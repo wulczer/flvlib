@@ -1,13 +1,12 @@
 #!/usr/bin/python
 
-import os
 import sys
 import pprint
 import logging
 
 from optparse import OptionParser
 
-from flvlib import VERSIONSTR
+from flvlib import __versionstr__
 from flvlib import tags
 from flvlib.tags import FLV, EndOfFile
 from flvlib.astypes import MalformedFLV
@@ -54,7 +53,7 @@ def process_options():
     description = ("Checks FLV files for comformance with the FLV "
                    "specification. Outputs a list of tags and, "
                    "if present, the content of the onMetaData script tag.")
-    version = "%%prog flvlib %s" % VERSIONSTR
+    version = "%%prog flvlib %s" % __versionstr__
     parser = OptionParser(usage=usage, description=description, version=version)
     parser.add_option("-s", "--strict", action="store_true",
                       help="be strict while parsing the FLV file")

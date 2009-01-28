@@ -66,6 +66,7 @@ def make_longstring(string):
 # ECMA Array
 def get_ecma_array(f, max_offset=None):
     length = get_ui32(f)
+    log.debug("The ECMA array has approximately %d elements", length)
     array = {}
     while True:
         if max_offset and (f.tell() == max_offset):
@@ -93,7 +94,7 @@ def get_strict_array(f, max_offset=None):
     length = get_ui32(f)
     log.debug("The length is %d", length)
     elements = [get_script_data_value(f, max_offset=max_offset)
-                for i in xrange(length)]
+                for _ in xrange(length)]
     return elements
 
 def make_strict_array(l):

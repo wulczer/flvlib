@@ -1,6 +1,4 @@
-import os
 import struct
-import datetime
 
 """
 The internal FLV representations of numbers.

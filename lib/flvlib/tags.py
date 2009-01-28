@@ -1,10 +1,7 @@
 #!/usr/bin/python
 
 import os
-import sys
 import struct
-import time
-import datetime
 import logging
 
 from primitives import *

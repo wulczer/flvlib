@@ -8,7 +8,7 @@ import tempfile
 
 from optparse import OptionParser
 
-from flvlib import VERSIONSTR
+from flvlib import __versionstr__
 from flvlib.constants import TAG_TYPE_AUDIO, TAG_TYPE_VIDEO, TAG_TYPE_SCRIPT
 from flvlib.constants import FRAME_TYPE_KEYFRAME
 from flvlib.astypes import MalformedFLV, FLVObject
@@ -123,7 +123,7 @@ def process_options():
                    "With the -U (update) option operates on all parameters, "
                    "updating the files in place. Without the -U option "
                    "accepts one input and one output file path.")
-    version = "%%prog flvlib %s" % VERSIONSTR
+    version = "%%prog flvlib %s" % __versionstr__
     parser = OptionParser(usage=usage, description=description, version=version)
     parser.add_option("-U", "--update", action="store_true",
                       help=("update mode, overwrites the given files "
@@ -196,7 +196,7 @@ def index_file(inpath, outpath=None):
 
     metadata['duration'] = duration
     metadata['keyframes'] = keyframes
-    metadata['metadatacreator'] = 'flvlib %s' % VERSIONSTR
+    metadata['metadatacreator'] = 'flvlib %s' % __versionstr__
 
     # we're going to write new metadata, so we need to shift the
     # filepositions by the amount of bytes that we're going to add to

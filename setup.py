@@ -1,9 +1,21 @@
 #!/usr/bin/python
 
+import os
+import sys
+
 from distutils.core import setup
 
+# Make sure we import flvlib from the current build directory
+sys.path.insert(0, os.path.join(sys.path[0], 'lib'))
+
+from flvlib import __versionstr__
+
+# Revert sys.path to the previous state
+sys.path = sys.path[1:]
+
+
 setup(name="flvlib",
-      version="0.1.0",
+      version=__versionstr__,
       description="Parsing and manipulating FLV files",
       long_description= \
 """A library for manipulating, parsing and verifying FLV files.
