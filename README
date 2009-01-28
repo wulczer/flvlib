@@ -18,6 +18,5 @@ $ debug-flv --help
 $ index-flv --help
 for more available parameters.
 
-The library and the scripts are distributed under the New BSD
-License. You can contact the author, Jan Urbanski, at
-wulczer@wulczer.org.
+The library and the scripts are distributed under the MIT License.
+You can contact the author, Jan Urbanski, at wulczer@wulczer.org.
