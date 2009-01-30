@@ -6,13 +6,21 @@ import sys
 from distutils.core import setup
 
 # Make sure we import flvlib from the current build directory
-sys.path.insert(0, os.path.join(sys.path[0], 'lib'))
+curdir = os.path.abspath(os.path.dirname(sys.argv[0]))
+sys.path.insert(0, os.path.join(curdir, 'lib'))
 
 from flvlib import __versionstr__
 
 # Revert sys.path to the previous state
 sys.path = sys.path[1:]
 
+# Don't install man pages and the README on a non-Linux system
+if sys.platform == 'linux2':
+    data_files = [('share/man/man1', ['man/debug-flv.1', 'man/index-flv.1']),
+                  ('share/doc/flvlib-%s' % __versionstr__,
+                   ['README', 'LICENSE'])]
+else:
+    data_files = []
 
 setup(name="flvlib",
       version=__versionstr__,
@@ -28,5 +36,6 @@ which demonstrate the possible applications of the library.
       url="http://wulczer.org/flvlib/",
       provides="flvlib",
       package_dir={'': 'lib'},
-      packages=["flvlib"],
-      scripts=["scripts/debug-flv", "scripts/index-flv"])
+      packages=["flvlib", "flvlib.scripts"],
+      scripts=["scripts/debug-flv", "scripts/index-flv"],
+      data_files=data_files)

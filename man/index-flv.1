@@ -1,0 +1,29 @@
+.TH INDEX-FLV "1" "January 2009" "index-flv" "User Commands"
+.SH NAME
+index-flv \- manual page for index-flv
+.SH SYNOPSIS
+.B index-flv
+[\fI-U\fR] \fIfile \fR[\fIoutfile|file2 file3 \fR...]
+.SH DESCRIPTION
+Finds keyframe timestamps and file offsets in FLV files and updates the
+onMetaData script tag with that information. With the \fB\-U\fR (update) option
+operates on all parameters, updating the files in place. Without the \fB\-U\fR option
+accepts one input and one output file path.
+.SH OPTIONS
+.TP
+\fB\-\-version\fR
+show program's version number and exit
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+show this help message and exit
+.TP
+\fB\-U\fR, \fB\-\-update\fR
+update mode, overwrites the given files instead of writing to
+outfile
+.TP
+\fB\-v\fR, \fB\-\-verbose\fR
+be more verbose, each \fB\-v\fR increases verbosity
+.SH AUTHOR
+Written by Jan Urbanski <wulczer@wulczer.org>
+.SH "SEE ALSO"
+debug-flv(1)
