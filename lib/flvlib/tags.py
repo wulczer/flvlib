@@ -192,9 +192,9 @@ class ScriptTag(Tag):
 
         # Here there's always a byte with the value of 0x02,
         # which means "string", although the spec says NOTHING
-        # about it... Shit.
+        # about it..
         value_type = get_ui8(f)
-        ensure(value_type, 2, "Warning! Weird shit happening!")
+        ensure(value_type, 2, "The name of a script tag is not a string")
 
         # Need to pass the tag end offset, because apparently YouTube
         # doesn't give a *shit* about the FLV spec and just happily
