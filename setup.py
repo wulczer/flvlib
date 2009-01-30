@@ -18,7 +18,7 @@ sys.path = sys.path[1:]
 if sys.platform == 'linux2':
     data_files = [('share/man/man1', ['man/debug-flv.1', 'man/index-flv.1']),
                   ('share/doc/flvlib-%s' % __versionstr__,
-                   ['README', 'LICENSE'])]
+                   ['README'])]
 else:
     data_files = []
 
