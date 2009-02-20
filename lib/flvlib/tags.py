@@ -51,6 +51,10 @@ class Tag(object):
         self.timestamp = get_si32_extended(f)
         log.debug("Tag timestamp is %d", self.timestamp)
 
+        if self.timestamp < 0:
+            log.warning("The tag at offset 0x%08X has negative timestamp: %d",
+                        self.offset, self.timestamp)
+
         # StreamID
         stream_id = get_ui24(f)
         ensure(stream_id, 0, "StreamID non zero: 0x%06X" % stream_id)
