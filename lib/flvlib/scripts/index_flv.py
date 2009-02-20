@@ -150,7 +150,8 @@ def index_file(inpath, outpath=None):
     keyframes = flv.keyframes
 
     if flv.no_video:
-        log.info("The file `%s' has no video, adding fake keyframe info", inpath)
+        log.info("The file `%s' has no video, adding fake keyframe info",
+                 inpath)
         keyframes = keyframes_from_audiotags(flv)
 
     duration = metadata.get('duration', None)
@@ -229,7 +230,8 @@ def process_options():
                    "updating the files in place. Without the -U option "
                    "accepts one input and one output file path.")
     version = "%%prog flvlib %s" % __versionstr__
-    parser = OptionParser(usage=usage, description=description, version=version)
+    parser = OptionParser(usage=usage, description=description,
+                          version=version)
     parser.add_option("-U", "--update", action="store_true",
                       help=("update mode, overwrites the given files "
                             "instead of writing to outfile"))
@@ -248,8 +250,8 @@ def process_options():
     if options.verbosity > 3:
         options.verbosity = 3
 
-    log.setLevel({0:logging.ERROR, 1:logging.WARNING,
-                  2:logging.INFO, 3:logging.DEBUG}[options.verbosity])
+    log.setLevel({0: logging.ERROR, 1: logging.WARNING,
+                  2: logging.INFO, 3: logging.DEBUG}[options.verbosity])
 
     return options, args
 

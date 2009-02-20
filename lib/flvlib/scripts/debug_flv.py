@@ -26,7 +26,8 @@ def debug_file(filename, quiet=False, metadata=False):
         flv.parse()
     except MalformedFLV, e:
         message = e[0] % e[1:]
-        log.error("The file `%s' is not a valid FLV file: %s", filename, message)
+        log.error("The file `%s' is not a valid FLV file: %s",
+                  filename, message)
         return False
     except EndOfFile:
         log.error("Unexpected end of file on file `%s'", filename)
@@ -52,7 +53,8 @@ def process_options():
                    "specification. Outputs a list of tags and, "
                    "if present, the content of the onMetaData script tag.")
     version = "%%prog flvlib %s" % __versionstr__
-    parser = OptionParser(usage=usage, description=description, version=version)
+    parser = OptionParser(usage=usage, description=description,
+                          version=version)
     parser.add_option("-s", "--strict", action="store_true",
                       help="be strict while parsing the FLV file")
     parser.add_option("-q", "--quiet", action="store_true",
@@ -73,8 +75,8 @@ def process_options():
     if options.verbosity > 3:
         options.verbosity = 3
 
-    level = ({0:logging.ERROR, 1:logging.WARNING,
-              2:logging.INFO, 3:logging.DEBUG}[options.verbosity])
+    level = ({0: logging.ERROR, 1: logging.WARNING,
+              2: logging.INFO, 3: logging.DEBUG}[options.verbosity])
     logging.getLogger('flvlib').setLevel(level)
 
     return options, args
