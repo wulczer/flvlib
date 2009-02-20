@@ -250,10 +250,7 @@ class FLV(object):
         self.has_video = None
         self.tags = []
 
-    def parse(self):
-        # Going from the end of the file upwards doesn't make sense:
-        # the PreviousTagSize fields in FLVs are frequently incorrect
-
+    def parse_header(self):
         f = self.f
         f.seek(0)
 
@@ -298,17 +295,19 @@ class FLV(object):
         tag_0_size = get_ui32(f)
         ensure(tag_0_size, 0, "PreviousTagSize0 non zero: 0x%08X" % tag_0_size)
 
-        # Read the tags
-        self.read_tags()
-
-    def read_tags(self):
+    def iter_tags(self):
+        self.parse_header()
         try:
             while True:
-                self.read_tag()
+                tag = self.get_next_tag()
+                yield tag
         except EndOfTags:
             pass
 
-    def read_tag(self):
+    def read_tags(self):
+        self.tags = list(self.iter_tags())
+
+    def get_next_tag(self):
         f = self.f
 
         try:
@@ -322,7 +321,7 @@ class FLV(object):
 
         tag.parse()
 
-        self.tags.append(tag)
+        return tag
 
     def tag_type_to_class(self, tag_type):
         try:

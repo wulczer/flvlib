@@ -22,8 +22,23 @@ def debug_file(filename, quiet=False, metadata=False):
 
     flv = tags.FLV(f)
 
+    if not quiet:
+        print "=== `%s' ===" % filename
+
     try:
-        flv.parse()
+        tag_generator = flv.iter_tags()
+        for i, tag in enumerate(tag_generator):
+            if quiet:
+                # If we're quiet, we just want to catch errors
+                continue
+            # Print the tag information
+            print "#%05d %s" % (i + 1, tag)
+            # Print the content of onMetaData tags
+            if (isinstance(tag, tags.ScriptTag)
+                and tag.name == "onMetaData"):
+                pprint.pprint(tag.variable)
+                if metadata:
+                    return True
     except MalformedFLV, e:
         message = e[0] % e[1:]
         log.error("The file `%s' is not a valid FLV file: %s",
@@ -34,17 +49,6 @@ def debug_file(filename, quiet=False, metadata=False):
         return False
 
     f.close()
-
-    if quiet:
-        return True
-
-    print "=== `%s' ===" % filename
-    for i, tag in enumerate(flv.tags):
-        print "#%05d %s" % (i + 1, tag)
-        if isinstance(tag, tags.ScriptTag) and tag.name == "onMetaData":
-            pprint.pprint(tag.variable)
-            if metadata:
-                return True
 
 
 def process_options():

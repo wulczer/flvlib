@@ -126,7 +126,7 @@ def index_file(inpath, outpath=None):
     flv = IndexingFLV(f)
 
     try:
-        flv.parse()
+        flv.read_tags()
     except MalformedFLV, e:
         message = e[0] % e[1:]
         log.error("The file `%s' is not a valid FLV file: %s", inpath, message)
