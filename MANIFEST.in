@@ -1,2 +1,4 @@
+include fix-rpm-compressing-files
 include LICENSE
+include MANIFEST.in
 graft man/
