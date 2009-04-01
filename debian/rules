@@ -1,0 +1,72 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+SHELL = /bin/bash
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+PYVERS	:= $(shell pyversions -vs)
+VER	:= $(shell /usr/bin/python -c 'import sys; print sys.version[:3]')
+
+build: build-stamp
+build-stamp: $(PYVERS:%=build-python%)
+	touch $@
+build-python%:
+	python$* setup.py build
+	touch $@
+
+clean:
+	rm -rf *-stamp build-python* build
+	rm -rf $(addprefix debian/,$(packages)) debian/files debian/substvars
+	find . -name "*.pyc" |xargs -r rm
+	dh_clean
+
+install: build-stamp install-prereq $(PYVERS:%=install-python%)
+
+install-prereq: build-stamp
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+
+install-python%: install-prereq
+	: # python-flvlib
+	python$* setup.py install --prefix=debian/python-flvlib/usr
+	-find debian/python-flvlib -name '*.py[co]' | xargs rm -f
+
+	: # Replace all '#!' calls to python with python
+	: # and make them executable
+	for i in `find debian/python-flvlib* -mindepth 3 -type f`; do \
+	  sed '1s,#!.*python[^ ]*\(.*\),#! /usr/bin/python\1,' \
+		$$i > $$i.temp; \
+	  if cmp --quiet $$i $$i.temp; then \
+	    rm -f $$i.temp; \
+	  else \
+	    mv -f $$i.temp $$i; \
+	    chmod 755 $$i; \
+	    echo "fixed interpreter: $$i"; \
+	  fi; \
+	done
+
+# Build architecture-independent files here.
+binary-indep: build install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs -i
+	dh_installdocs -i -A
+	dh_installmenu -i
+	dh_compress -i -X.py
+	dh_fixperms -i
+	dh_pycentral -i
+	dh_installdeb -i
+	dh_gencontrol -i
+	dh_md5sums -i
+	dh_builddeb -i
+
+# Build architecture-dependent files here.
+binary-arch: build install
+# We have nothing to do by default.
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install install-prereq \
+	install-python binary-indep binary-arch

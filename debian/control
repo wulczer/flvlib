@@ -1,0 +1,17 @@
+Source: flvlib
+Section: python
+Priority: optional
+Maintainer: Jan Urbanski <wulczer@wulczer.org>
+Build-Depends: debhelper (>= 5.0.38), python-all-dev (>= 2.3.5-11), python-central (>= 0.5.6)
+XS-Python-Version: >=2.4
+Standards-Version: 3.8.0
+
+Package: python-flvlib
+Architecture: all
+Depends: ${python:Depends}
+Homepage: http://wulczer.org/
+XB-Python-Version: >= 2.4
+Description: Parsing and manipulating FLV files
+ A library for manipulating, parsing and verifying FLV files.
+ It also includes two example scripts, debug-flv and index-flv,
+ which demonstrate the possible applications of the library.
