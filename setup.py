@@ -16,9 +16,7 @@ sys.path = sys.path[1:]
 
 # Don't install man pages and the README on a non-Linux system
 if sys.platform == 'linux2':
-    data_files = [('share/man/man1', ['man/debug-flv.1', 'man/index-flv.1']),
-                  ('share/doc/flvlib-%s' % __versionstr__,
-                   ['README'])]
+    data_files = [('share/man/man1', ['man/debug-flv.1', 'man/index-flv.1'])]
 else:
     data_files = []
 
