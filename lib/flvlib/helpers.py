@@ -1,5 +1,6 @@
 import time
 import datetime
+from UserDict import DictMixin, UserDict
 
 class LocalTimezone(datetime.tzinfo):
     """A tzinfo class representing the system's idea of the local timezone"""
@@ -52,3 +53,36 @@ class FixedOffset(datetime.tzinfo):
 
     def __repr__(self):
         return '<FixedOffset %s>' % self.__offset
+
+
+class OrderedDict(DictMixin):
+    """
+    A dictionary that preserves insert order.
+    Largely copied from twisted.python.util (thanks!).
+    """
+
+    def __init__(self, dict=None, **kwargs):
+        self._order = []
+        self.data = {}
+        if dict is not None:
+            self.update(dict)
+        if len(kwargs):
+            self.update(kwargs)
+
+    def __repr__(self):
+        return '{'+', '.join([('%r: %r' % item) for item in self.items()])+'}'
+
+    def __setitem__(self, key, value):
+        if key not in self:
+            self._order.append(key)
+        self.data[key] = value
+
+    def __getitem__(self, key):
+        return self.data[key]
+
+    def __delitem__(self, key):
+        del self.data[key]
+        self._order.remove(key)
+
+    def keys(self):
+        return list(self._order)

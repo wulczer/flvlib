@@ -6,7 +6,7 @@ import logging
 
 from primitives import *
 from constants import *
-from helpers import FixedOffset, Local
+from helpers import FixedOffset, Local, OrderedDict
 
 
 """
@@ -67,7 +67,7 @@ def make_longstring(string):
 def get_ecma_array(f, max_offset=None):
     length = get_ui32(f)
     log.debug("The ECMA array has approximately %d elements", length)
-    array = {}
+    array = OrderedDict()
     while True:
         if max_offset and (f.tell() == max_offset):
             log.debug("Prematurely terminating reading an ECMA array")
@@ -233,6 +233,7 @@ type_to_as_type = {
     unicode: VALUE_TYPE_STRING,
     list: VALUE_TYPE_STRICT_ARRAY,
     dict: VALUE_TYPE_ECMA_ARRAY,
+    OrderedDict: VALUE_TYPE_ECMA_ARRAY,
     datetime.datetime: VALUE_TYPE_DATE,
     Undefined: VALUE_TYPE_UNDEFINED,
     MovieClip: VALUE_TYPE_MOVIECLIP,
