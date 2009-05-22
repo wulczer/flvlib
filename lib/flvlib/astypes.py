@@ -269,7 +269,7 @@ def get_script_data_value(f, max_offset=None):
     return value
 
 def make_script_data_value(value):
-    value_type = type_to_as_type.get(type(value), VALUE_TYPE_OBJECT)
+    value_type = type_to_as_type.get(value.__class__, VALUE_TYPE_OBJECT)
     log.debug("The value type is %r", value_type)
     try:
         make_value = as_type_to_getter_and_maker[value_type][1]
