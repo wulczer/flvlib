@@ -8,9 +8,13 @@ A library for manipulating, parsing and verifying FLV files.
 It includes two example scripts, debug-flv and index-flv,
 which demonstrate the possible applications of the library.
 
-Provides an easy and extensible way of writing applications that parse and transforming FLV files. Checks file correctness based on the official specification released by Adobe.
+Provides an easy and extensible way of writing applications that parse
+and transforming FLV files. Checks file correctness based on the
+official specification released by Adobe.
 
-Can be used as a drop-in replacement for FLVTool2, from which it is typically much faster. Unlike FLVTool2 it works on audio-only file and does not overwrite any previous metadata the file might have.
+Can be used as a drop-in replacement for FLVTool2, from which it is
+typically much faster. Unlike FLVTool2 it works on audio-only file and
+does not overwrite any previous metadata the file might have.
 
 Example usage
 -------------
