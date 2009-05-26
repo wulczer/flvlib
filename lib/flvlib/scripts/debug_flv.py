@@ -6,7 +6,6 @@ from optparse import OptionParser
 
 from flvlib import __versionstr__
 from flvlib import tags
-from flvlib.tags import FLV, EndOfFile
 from flvlib.astypes import MalformedFLV
 
 log = logging.getLogger('flvlib.debug-flv')
@@ -44,7 +43,7 @@ def debug_file(filename, quiet=False, metadata=False):
         log.error("The file `%s' is not a valid FLV file: %s",
                   filename, message)
         return False
-    except EndOfFile:
+    except tags.EndOfFile:
         log.error("Unexpected end of file on file `%s'", filename)
         return False
 
