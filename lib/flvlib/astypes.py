@@ -74,6 +74,7 @@ def get_ecma_array(f, max_offset=None):
             break
         marker = get_ui24(f)
         if marker == 9:
+            log.debug("Marker!")
             break
         else:
             f.seek(-3, os.SEEK_CUR)
