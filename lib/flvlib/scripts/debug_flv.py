@@ -1,11 +1,11 @@
 import sys
-import pprint
 import logging
 
 from optparse import OptionParser
 
 from flvlib import __versionstr__
 from flvlib import tags
+from flvlib import helpers
 from flvlib.astypes import MalformedFLV
 
 log = logging.getLogger('flvlib.debug-flv')
@@ -35,7 +35,7 @@ def debug_file(filename, quiet=False, metadata=False):
             # Print the content of onMetaData tags
             if (isinstance(tag, tags.ScriptTag)
                 and tag.name == "onMetaData"):
-                pprint.pprint(tag.variable)
+                helpers.pprint(tag.variable)
                 if metadata:
                     return True
     except MalformedFLV, e:

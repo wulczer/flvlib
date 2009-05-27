@@ -113,3 +113,85 @@ class OrderedAttrDict(DictMixin):
 
     def __str__(self):
         return '%s' % self._data_priv_
+
+
+class ASPrettyPrinter(object):
+    """Pretty printing of AS objects"""
+
+    def pformat(cls, val, indent=0):
+        cls.io = StringIO()
+        cls.pprint_lookup(val, indent)
+        return cls.io.getvalue()
+    pformat = classmethod(pformat)
+
+    def pprint(cls, val):
+        print cls.pformat(val)
+    pprint = classmethod(pprint)
+
+    def pprint_lookup(cls, val, ident):
+        if isinstance(val, basestring):
+            return cls.pprint_string(val)
+        if isinstance(val, (int, long, float)):
+            return cls.pprint_number(val)
+        if getattr(val, 'iterkeys', None):
+            # dict interface
+            return cls.pprint_dict(val, ident)
+        if getattr(val, 'append', None):
+            # list interface
+            return cls.pprint_list(val, ident)
+        # Unknown type ?
+        cls.io.write("%r" % val)
+        return False
+    pprint_lookup = classmethod(pprint_lookup)
+
+    def pprint_string(cls, val):
+        if isinstance(val, unicode):
+            cls.io.write("u'%s'" % val.encode("UTF8"))
+        else:
+            cls.io.write("'%s'" % val)
+        return False
+    pprint_string = classmethod(pprint_string)
+
+    def pprint_number(cls, val):
+        cls.io.write(str(val))
+        return False
+    pprint_number = classmethod(pprint_number)
+
+    def pprint_dict(cls, val, indent):
+
+        def pprint_item(k):
+            last_pos = cls.io.tell()
+            cls.io.write(repr(k))
+            cls.io.write(": ")
+            new_indent = indent + cls.io.tell() - last_pos + 1
+            return cls.pprint_lookup(val[k], new_indent)
+
+        cls.io.write('{')
+        indented = False
+        keys = list(val.iterkeys())
+        if keys:
+            for k in keys[:-1]:
+                indented |= pprint_item(k)
+                cls.io.write(",\n%s " % (" "*indent))
+            indented |= pprint_item(keys[-1])
+        cls.io.write('}')
+        return (len(keys) > 1) | indented
+    pprint_dict = classmethod(pprint_dict)
+
+    def pprint_list(cls, val, indent):
+        last_pos = cls.io.tell()
+        cls.io.write('[')
+        new_indent = indent + cls.io.tell() - last_pos
+        indented = False
+        values = list(iter(val))
+        if values:
+            for v in values[:-1]:
+                indented |= cls.pprint_lookup(v, new_indent)
+                cls.io.write(",\n%s" % (" "*new_indent))
+            indented |= cls.pprint_lookup(values[-1], new_indent)
+        cls.io.write(']')
+        return (len(values) > 1) | indented
+    pprint_list = classmethod(pprint_list)
+
+pformat = ASPrettyPrinter.pformat
+pprint = ASPrettyPrinter.pprint
