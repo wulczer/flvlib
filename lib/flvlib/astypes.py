@@ -1,12 +1,11 @@
 import os
 import time
-import pprint
 import datetime
 import logging
 
 from primitives import *
 from constants import *
-from helpers import FixedOffset, Local, OrderedDict
+from helpers import FixedOffset, Local, OrderedAttrDict
 
 
 """
@@ -64,10 +63,14 @@ def make_longstring(string):
 
 
 # ECMA Array
+class ECMAArray(OrderedAttrDict):
+    pass
+
+
 def get_ecma_array(f, max_offset=None):
     length = get_ui32(f)
     log.debug("The ECMA array has approximately %d elements", length)
-    array = OrderedDict()
+    array = ECMAArray()
     while True:
         if max_offset and (f.tell() == max_offset):
             log.debug("Prematurely terminating reading an ECMA array")
@@ -134,10 +137,8 @@ def make_null(none):
 
 
 # Object
-class FLVObject(object):
-
-    def __repr__(self):
-        return pprint.pformat(self.__dict__)
+class FLVObject(OrderedAttrDict):
+    pass
 
 
 def get_object(f, max_offset=None):
@@ -157,8 +158,15 @@ def get_object(f, max_offset=None):
     return ret
 
 def make_object(obj):
+    # If the object is iterable, serialize keys/values. If not, fall
+    # back on iterating over __dict__.
+    # This makes sure that make_object(get_object(StringIO(blob))) == blob
+    try:
+        iterator = obj.iteritems()
+    except AttributeError:
+        iterator = obj.__dict__.iteritems()
     ret = ''.join([make_script_data_variable(name, value)
-                   for name, value in obj.__dict__.iteritems()])
+                   for name, value in iterator])
     marker = make_ui24(9)
     return ret + marker
 
@@ -234,7 +242,7 @@ type_to_as_type = {
     unicode: VALUE_TYPE_STRING,
     list: VALUE_TYPE_STRICT_ARRAY,
     dict: VALUE_TYPE_ECMA_ARRAY,
-    OrderedDict: VALUE_TYPE_ECMA_ARRAY,
+    ECMAArray: VALUE_TYPE_ECMA_ARRAY,
     datetime.datetime: VALUE_TYPE_DATE,
     Undefined: VALUE_TYPE_UNDEFINED,
     MovieClip: VALUE_TYPE_MOVIECLIP,

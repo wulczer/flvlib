@@ -1,6 +1,8 @@
 import time
 import datetime
-from UserDict import DictMixin, UserDict
+
+from StringIO import StringIO
+from UserDict import DictMixin
 
 class LocalTimezone(datetime.tzinfo):
     """A tzinfo class representing the system's idea of the local timezone"""
@@ -54,35 +56,60 @@ class FixedOffset(datetime.tzinfo):
     def __repr__(self):
         return '<FixedOffset %s>' % self.__offset
 
-
-class OrderedDict(DictMixin):
+class OrderedAttrDict(DictMixin):
     """
-    A dictionary that preserves insert order.
-    Largely copied from twisted.python.util (thanks!).
+    A dictionary that preserves insert order and also has an attribute
+    interface.
+
+    Values can be transparently accessed and set as keys or as attributes.
     """
 
     def __init__(self, dict=None, **kwargs):
-        self._order = []
-        self.data = {}
+        self.__dict__["_order_priv_"] = []
+        self.__dict__["_data_priv_"] = {}
         if dict is not None:
             self.update(dict)
         if len(kwargs):
             self.update(kwargs)
 
-    def __repr__(self):
-        return '{'+', '.join([('%r: %r' % item) for item in self.items()])+'}'
+    # Mapping interface
 
     def __setitem__(self, key, value):
         if key not in self:
-            self._order.append(key)
-        self.data[key] = value
+            self._order_priv_.append(key)
+        self._data_priv_[key] = value
 
     def __getitem__(self, key):
-        return self.data[key]
+        return self._data_priv_[key]
 
     def __delitem__(self, key):
-        del self.data[key]
-        self._order.remove(key)
+        del self._data_priv_[key]
+        self._order_priv_.remove(key)
 
     def keys(self):
-        return list(self._order)
+        return list(self._order_priv_)
+
+    # Attribute interface
+
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError(name)
+
+    def __setattr__(self, name, value):
+        self[name] = value
+
+    def __delattr__(self, name):
+        try:
+            del self[name]
+        except KeyError:
+            raise AttributeError(name)
+
+    # String representation
+
+    def __repr__(self):
+        return '<%s %r>' % (self.__class__.__name__, self._data_priv_)
+
+    def __str__(self):
+        return '%s' % self._data_priv_
