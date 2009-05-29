@@ -45,6 +45,9 @@ def get_string(f, max_offset=None):
     return ret
 
 def make_string(string):
+    if isinstance(string, unicode):
+        # We need a blob, not unicode. Arbitrarily choose UTF-8
+        string = string.encode('UTF-8')
     length = make_ui16(len(string))
     return length + string
 
