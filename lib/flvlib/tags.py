@@ -334,17 +334,21 @@ class FLV(object):
             raise MalformedFLV("Invalid tag type: %d", tag_type)
 
 
-def create_script_tag(name, data, timestamp=0):
-    tag_type = struct.pack("B", 18)
+def create_flv_tag(type, data, timestamp=0):
+    tag_type = struct.pack("B", type)
     timestamp = make_si32_extended(timestamp)
     stream_id = make_ui24(0)
 
-    payload = make_ui8(2) + make_script_data_variable(name, data)
-    data_size = len(payload)
+    data_size = len(data)
     tag_size = data_size + 11
 
     return ''.join([tag_type, make_ui24(data_size), timestamp, stream_id,
-                    payload, make_ui32(tag_size)])
+                    date, make_ui32(tag_size)])
+
+
+def create_script_tag(name, data, timestamp=0):
+    payload = make_ui8(2) + make_script_data_variable(name, data)
+    return create_flv_tag(TAG_TYPE_SCRIPT, payload, timestamp)
 
 
 def create_flv_header(has_audio=True, has_video=True):
