@@ -343,7 +343,7 @@ def create_flv_tag(type, data, timestamp=0):
     tag_size = data_size + 11
 
     return ''.join([tag_type, make_ui24(data_size), timestamp, stream_id,
-                    date, make_ui32(tag_size)])
+                    data, make_ui32(tag_size)])
 
 
 def create_script_tag(name, data, timestamp=0):
