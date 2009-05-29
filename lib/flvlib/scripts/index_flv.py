@@ -18,34 +18,58 @@ log = logging.getLogger('flvlib.index-flv')
 
 class IndexingAudioTag(AudioTag):
 
+    SEEKPOINT_DENSITY = 10
+
+    def __init__(self, parent_flv, f):
+        AudioTag.__init__(self, parent_flv, f)
+
     def parse(self):
+        parent = self.parent_flv
         AudioTag.parse(self)
 
-        if not self.parent_flv.first_media_tag_offset:
-            self.parent_flv.first_media_tag_offset = self.offset
+        if not parent.first_media_tag_offset:
+            parent.first_media_tag_offset = self.offset
+
+
+        # If the FLV has video, we're done. No need to store audio seekpoint
+        # information anymore.
+        if not parent.no_video:
+            return
+
+        # We haven't seen any video tag yet. Store every SEEKPOINT_DENSITY tag
+        # offset and timestamp.
+        parent.audio_tag_number += 1
+        if (parent.audio_tag_number % self.SEEKPOINT_DENSITY == 0):
+            parent.audio_seekpoints.filepositions.append(self.offset)
+            parent.audio_seekpoints.times.append(self.timestamp / 1000.0)
 
 
 class IndexingVideoTag(VideoTag):
 
     def parse(self):
-        self.parent_flv.no_video = False
+        parent = self.parent_flv
         VideoTag.parse(self)
 
-        if not self.parent_flv.first_media_tag_offset:
-            self.parent_flv.first_media_tag_offset = self.offset
+        parent.no_video = False
+
+        if not parent.first_media_tag_offset:
+            parent.first_media_tag_offset = self.offset
+
         if self.frame_type == FRAME_TYPE_KEYFRAME:
-            self.parent_flv.keyframes.filepositions.append(self.offset)
-            self.parent_flv.keyframes.times.append(self.timestamp / 1000.0)
+            parent.keyframes.filepositions.append(self.offset)
+            parent.keyframes.times.append(self.timestamp / 1000.0)
 
 
 class IndexingScriptTag(ScriptTag):
 
     def parse(self):
+        parent = self.parent_flv
         ScriptTag.parse(self)
+
         if self.name == 'onMetaData':
-            self.parent_flv.metadata = self.variable
-            self.parent_flv.metadata_tag_start = self.offset
-            self.parent_flv.metadata_tag_end = self.f.tell()
+            parent.metadata = self.variable
+            parent.metadata_tag_start = self.offset
+            parent.metadata_tag_end = self.f.tell()
 
 
 tag_to_class = {
@@ -64,7 +88,20 @@ class IndexingFLV(FLV):
         self.keyframes.filepositions = []
         self.keyframes.times = []
         self.no_video = True
-        self.metadata_content = None
+
+        # If the FLV file has no video, there are no keyframes. We want to put
+        # some info in the metadata anyway -- Flash players use keyframe
+        # information as a seek table. In audio-only FLV files you can usually
+        # seek to the beginning of any tag (this is not entirely true for AAC).
+        # Most players still work if you just provide "keyframe" info that's
+        # really a table of every Nth audio tag, even with AAC.
+        # Because of that, until we see a video tag we make every Nth
+        # IndexingAudioTag store its offset and timestamp.
+        self.audio_tag_number = 0
+        self.audio_seekpoints = FLVObject()
+        self.audio_seekpoints.filepositions = []
+        self.audio_seekpoints.times = []
+
         self.metadata_tag_start = None
         self.metadata_tag_end = None
         self.first_media_tag_offset = None
@@ -74,32 +111,6 @@ class IndexingFLV(FLV):
             return tag_to_class[tag_type]
         except KeyError:
             raise MalformedFLV("Invalid tag type: %d", tag_type)
-
-
-KEYFRAME_DENSITY = 10
-
-
-def keyframes_from_audiotags(flv):
-    keyframes = FLVObject()
-    keyframes.filepositions = []
-    keyframes.times = []
-    # that's not really speeding things up, is it?
-    audiotags = zip(*[(tag.offset, tag.timestamp / 1000.0)
-                      for i, tag in enumerate(flv.tags)
-                      if (i % KEYFRAME_DENSITY == 0 and
-                          isinstance(tag, AudioTag))])
-    if audiotags:
-        keyframes.filepositions = list(audiotags[0])
-        keyframes.times = list(audiotags[1])
-
-    return keyframes
-
-
-def duration_from_last_tag(flv):
-    # if the file has no tags at all, we would have errored out
-    # eariler, while checking for media content presence
-    last_tag = flv.tags[-1]
-    return last_tag.timestamp / 1000.0
 
 
 def filepositions_difference(metadata, original_metadata_size):
@@ -120,9 +131,11 @@ def index_file(inpath, outpath=None):
         return False
 
     flv = IndexingFLV(f)
+    tag_iterator = flv.iter_tags()
+    last_tag = None
 
     try:
-        flv.read_tags()
+        while True: last_tag = tag_iterator.next()
     except MalformedFLV, e:
         message = e[0] % e[1:]
         log.error("The file `%s' is not a valid FLV file: %s", inpath, message)
@@ -130,6 +143,8 @@ def index_file(inpath, outpath=None):
     except EndOfFile:
         log.error("Unexpected end of file on file `%s'", inpath)
         return False
+    except StopIteration:
+        pass
 
     if not flv.first_media_tag_offset:
         log.error("The file `%s' does not have any media content", inpath)
@@ -146,13 +161,15 @@ def index_file(inpath, outpath=None):
     keyframes = flv.keyframes
 
     if flv.no_video:
-        log.info("The file `%s' has no video, adding fake keyframe info",
+        log.info("The file `%s' has no video, using audio seekpoints info",
                  inpath)
-        keyframes = keyframes_from_audiotags(flv)
+        keyframes = flv.audio_seekpoints
 
     duration = metadata.get('duration', None)
     if not duration:
-        duration = duration_from_last_tag(flv)
+        # if the file has no tags at all, we would have errored out
+        # eariler, while checking for media content presence
+        duration = last_tag.timestamp / 1000.0
 
     metadata['duration'] = duration
     metadata['keyframes'] = keyframes
