@@ -60,10 +60,6 @@ class IndexingFLV(FLV):
     def __init__(self, f):
         FLV.__init__(self, f)
         self.metadata = None
-        # We could provide keyframes as en ECMAscript array, but
-        # gstreamer's flvdemux can't handle ECMA arrays in
-        # metadata. And since we like gstreamer, we'll use the Object
-        # type until gst-plugins-bad gets fixed.
         self.keyframes = FLVObject()
         self.keyframes.filepositions = []
         self.keyframes.times = []
