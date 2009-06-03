@@ -59,13 +59,9 @@ class Tag(object):
         stream_id = get_ui24(f)
         ensure(stream_id, 0, "StreamID non zero: 0x%06X" % stream_id)
 
-        # The rest gets parsed in the subclass
-
-    def seek_past_data(self, adjust=0):
-        f = self.f
-
-        f.seek(self.size + adjust, os.SEEK_CUR)
-        log.debug("%s seeked past the data of the tag", self)
+        # The rest gets parsed in the subclass, it should move f to the
+        # correct position to read PreviousTagSize
+        self.parse_tag_content()
 
         previous_tag_size = get_ui32(f)
         ensure(previous_tag_size, self.size + 11,
@@ -74,6 +70,10 @@ class Tag(object):
                (previous_tag_size, previous_tag_size,
                 self.size + 11, self.size + 11))
         log.debug("Ready to read another tag")
+
+    def parse_tag_content(self):
+        # By default just seek past the tag content
+        self.f.seek(self.size, os.SEEK_CUR)
 
 
 class AudioTag(Tag):
@@ -85,11 +85,11 @@ class AudioTag(Tag):
         self.sound_size = None
         self.sound_type = None
 
-    def parse(self):
+    def parse_tag_content(self):
         f = self.f
-        Tag.parse(self)
 
         sound_flags = get_ui8(f)
+        read_bytes = 1
 
         self.sound_format = (sound_flags & 0xF0) >> 4
         self.sound_rate = (sound_flags & 0xC) >> 2
@@ -128,7 +128,7 @@ class AudioTag(Tag):
                    "AAC sound format with incorrect sound type: %d" %
                    self.sound_type)
 
-        self.seek_past_data(adjust=-1)
+        f.seek(self.size - read_bytes, os.SEEK_CUR)
 
     def __repr__(self):
         if self.offset is None:
@@ -149,11 +149,11 @@ class VideoTag(Tag):
         self.frame_type = None
         self.codec_id = None
 
-    def parse(self):
+    def parse_tag_content(self):
         f = self.f
-        Tag.parse(self)
 
         video_flags = get_ui8(f)
+        read_bytes = 1
 
         self.frame_type = (video_flags & 0xF0) >> 4
         self.codec_id = video_flags & 0xF
@@ -168,7 +168,7 @@ class VideoTag(Tag):
             except KeyError:
                 raise MalformedFLV("Invalid codec ID: %d", self.codec_id)
 
-        self.seek_past_data(adjust=-1)
+        f.seek(self.size - read_bytes, os.SEEK_CUR)
 
     def __repr__(self):
         if self.offset is None:
@@ -190,9 +190,8 @@ class ScriptTag(Tag):
         self.name = None
         self.variable = None
 
-    def parse(self):
+    def parse_tag_content(self):
         f = self.f
-        Tag.parse(self)
 
         # Here there's always a byte with the value of 0x02,
         # which means "string", although the spec says NOTHING
@@ -218,14 +217,6 @@ class ScriptTag(Tag):
                    get_script_data_variable(f, max_offset=tag_end)
         log.debug("A script tag with a name of %s and value of %r",
                   self.name, self.variable)
-
-        previous_tag_size = get_ui32(f)
-        ensure(previous_tag_size, self.size + 11,
-               "PreviousTagSize of %d (0x%08X) "
-               "not equal to actual tag size of %d (0x%08X)" %
-               (previous_tag_size, previous_tag_size,
-                self.size + 11, self.size + 11))
-        log.debug("Ready to read another tag")
 
     def __repr__(self):
         if self.offset is None:
