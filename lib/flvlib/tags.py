@@ -84,6 +84,7 @@ class AudioTag(Tag):
         self.sound_rate = None
         self.sound_size = None
         self.sound_type = None
+        self.aac_packet_type = None  # always None for non-AAC tags
 
     def parse_tag_content(self):
         f = self.f
@@ -95,6 +96,21 @@ class AudioTag(Tag):
         self.sound_rate = (sound_flags & 0xC) >> 2
         self.sound_size = (sound_flags & 0x2) >> 1
         self.sound_type = sound_flags & 0x1
+
+        if self.sound_format == SOUND_FORMAT_AAC:
+            # AAC packets can be sequence headers or raw data.
+            # The former contain codec information needed by the decoder to be
+            # able to interpret the rest of the data.
+            self.aac_packet_type = get_ui8(f)
+            read_bytes += 1
+            # AAC always has sampling rate of 44 kHz
+            ensure(self.sound_rate, SOUND_RATE_44_KHZ,
+                   "AAC sound format with incorrect sound rate: %d" %
+                   self.sound_rate)
+            # AAC is always stereo
+            ensure(self.sound_type, SOUND_TYPE_STEREO,
+                   "AAC sound format with incorrect sound type: %d" %
+                   self.sound_type)
 
         if strict_parser():
             try:
@@ -117,16 +133,12 @@ class AudioTag(Tag):
             except KeyError:
                 raise MalformedFLV("Invalid sound type: %d",
                                    self.sound_type)
-
-        if self.sound_format == SOUND_FORMAT_AAC:
-            # AAC always has sampling rate of 44 kHz
-            ensure(self.sound_rate, SOUND_RATE_44_KHZ,
-                   "AAC sound format with incorrect sound rate: %d" %
-                   self.sound_rate)
-            # AAC is always stereo
-            ensure(self.sound_type, SOUND_TYPE_STEREO,
-                   "AAC sound format with incorrect sound type: %d" %
-                   self.sound_type)
+            try:
+                (self.aac_packet_type and
+                 aac_packet_type_to_string[self.aac_packet_type])
+            except KeyError:
+                raise MalformedFLV("Invalid AAC packet type: %d",
+                                   self.aac_packet_type)
 
         f.seek(self.size - read_bytes, os.SEEK_CUR)
 
@@ -136,10 +148,15 @@ class AudioTag(Tag):
         elif self.sound_format is None:
             return ("<AudioTag at offset 0x%08X, time %d, size %d>" %
                     (self.offset, self.timestamp, self.size))
-        else:
+        elif self.aac_packet_type is None:
             return ("<AudioTag at offset 0x%08X, time %d, size %d, %s>" %
                     (self.offset, self.timestamp, self.size,
                      sound_format_to_string[self.sound_format]))
+        else:
+            return ("<AudioTag at offset 0x%08X, time %d, size %d, %s, %s>" %
+                    (self.offset, self.timestamp, self.size,
+                     sound_format_to_string[self.sound_format],
+                     aac_packet_type_to_string[self.aac_packet_type]))
 
 
 class VideoTag(Tag):
@@ -148,6 +165,7 @@ class VideoTag(Tag):
         Tag.__init__(self, parent_flv, f)
         self.frame_type = None
         self.codec_id = None
+        self.h264_packet_type = None # Always None for non-H.264 tags
 
     def parse_tag_content(self):
         f = self.f
@@ -158,6 +176,12 @@ class VideoTag(Tag):
         self.frame_type = (video_flags & 0xF0) >> 4
         self.codec_id = video_flags & 0xF
 
+        if self.codec_id == CODEC_ID_H264:
+            # H.264 packets can be sequence headers, NAL units or sequence
+            # ends.
+            self.h264_packet_type = get_ui8(f)
+            read_bytes += 1
+
         if strict_parser():
             try:
                 frame_type_to_string[self.frame_type]
@@ -167,6 +191,12 @@ class VideoTag(Tag):
                 codec_id_to_string[self.codec_id]
             except KeyError:
                 raise MalformedFLV("Invalid codec ID: %d", self.codec_id)
+            try:
+                (self.h264_packet_type and
+                 h264_packet_type_to_string[self.h264_packet_type])
+            except KeyError:
+                raise MalformedFLV("Invalid H.264 packet type: %d",
+                                   self.h264_packet_type)
 
         f.seek(self.size - read_bytes, os.SEEK_CUR)
 
@@ -176,11 +206,17 @@ class VideoTag(Tag):
         elif self.frame_type is None:
             return ("<VideoTag at offset 0x%08X, time %d, size %d>" %
                     (self.offset, self.timestamp, self.size))
-        else:
+        elif self.h264_packet_type is None:
             return ("<VideoTag at offset 0x%08X, time %d, size %d, %s (%s)>" %
                     (self.offset, self.timestamp, self.size,
                      codec_id_to_string[self.codec_id],
                      frame_type_to_string[self.frame_type]))
+        else:
+            return ("<VideoTag at offset 0x%08X, time %d, size %d, %s (%s), %s>" %
+                    (self.offset, self.timestamp, self.size,
+                     codec_id_to_string[self.codec_id],
+                     frame_type_to_string[self.frame_type],
+                     h264_packet_type_to_string[self.h264_packet_type]))
 
 
 class ScriptTag(Tag):

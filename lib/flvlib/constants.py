@@ -72,6 +72,16 @@ sound_type_to_string = {
 }
 
 
+# AAC packet type
+(AAC_PACKET_TYPE_SEQUENCE_HEADER,
+ AAC_PACKET_TYPE_RAW) = range(2)
+
+aac_packet_type_to_string = {
+    AAC_PACKET_TYPE_SEQUENCE_HEADER: "sequence header",
+    AAC_PACKET_TYPE_RAW: "raw"
+}
+
+
 # Codec ID
 (CODEC_ID_JPEG,
  CODEC_ID_H263,
@@ -105,6 +115,18 @@ frame_type_to_string = {
     FRAME_TYPE_DISPOSABLE_INTERFRAME: "disposable interframe",
     FRAME_TYPE_GENERATED_KEYFRAME: "generated keyframe",
     FRAME_TYPE_INFO_FRAME: "video info/command frame"
+}
+
+
+# H.264 packet type
+(H264_PACKET_TYPE_SEQUENCE_HEADER,
+ H264_PACKET_TYPE_NALU,
+ H264_PACKET_TYPE_END_OF_SEQUENCE) = range(3)
+
+h264_packet_type_to_string = {
+    H264_PACKET_TYPE_SEQUENCE_HEADER: "sequence header",
+    H264_PACKET_TYPE_NALU: "NAL unit",
+    H264_PACKET_TYPE_END_OF_SEQUENCE: "sequence end"
 }
 
 
