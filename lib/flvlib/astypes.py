@@ -61,7 +61,7 @@ def get_longstring(f, max_offset=None):
     return ret
 
 def make_longstring(string):
-    length = get_ui32(len(string))
+    length = make_ui32(len(string))
     return length + string
 
 
