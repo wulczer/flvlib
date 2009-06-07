@@ -3,3 +3,4 @@ dist/
 .gitignore
 build/
 *.pyc
+_trial_temp/
