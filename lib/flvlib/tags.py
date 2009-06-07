@@ -151,12 +151,12 @@ class AudioTag(Tag):
         elif self.aac_packet_type is None:
             return ("<AudioTag at offset 0x%08X, time %d, size %d, %s>" %
                     (self.offset, self.timestamp, self.size,
-                     sound_format_to_string[self.sound_format]))
+                     sound_format_to_string.get(self.sound_format, '?'))
         else:
             return ("<AudioTag at offset 0x%08X, time %d, size %d, %s, %s>" %
                     (self.offset, self.timestamp, self.size,
-                     sound_format_to_string[self.sound_format],
-                     aac_packet_type_to_string[self.aac_packet_type]))
+                     sound_format_to_string.get(self.sound_format, '?'),
+                     aac_packet_type_to_string.get(self.aac_packet_type, '?')))
 
 
 class VideoTag(Tag):
@@ -209,14 +209,14 @@ class VideoTag(Tag):
         elif self.h264_packet_type is None:
             return ("<VideoTag at offset 0x%08X, time %d, size %d, %s (%s)>" %
                     (self.offset, self.timestamp, self.size,
-                     codec_id_to_string[self.codec_id],
-                     frame_type_to_string[self.frame_type]))
+                     codec_id_to_string.get(self.codec_id, '?'),
+                     frame_type_to_string.get(self.frame_type, '?')))
         else:
             return ("<VideoTag at offset 0x%08X, time %d, size %d, %s (%s), %s>" %
                     (self.offset, self.timestamp, self.size,
-                     codec_id_to_string[self.codec_id],
-                     frame_type_to_string[self.frame_type],
-                     h264_packet_type_to_string[self.h264_packet_type]))
+                     codec_id_to_string.get(self.codec_id, '?'),
+                     frame_type_to_string.get(self.frame_type, '?'),
+                     h264_packet_type_to_string.get(self.h264_packet_type, '?')))
 
 
 class ScriptTag(Tag):
