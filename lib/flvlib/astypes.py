@@ -183,6 +183,9 @@ class MovieClip(object):
     def __init__(self, path):
         self.path = path
 
+    def __eq__(self, other):
+        return isinstance(other, MovieClip) and self.path == other.path
+
     def __repr__(self):
         return "<MovieClip at %s>" % self.path
 
@@ -196,7 +199,12 @@ def make_movieclip(clip):
 
 # Undefined
 class Undefined(object):
-    pass
+
+    def __eq__(self, other):
+        return isinstance(other, Undefined)
+
+    def __repr__(self):
+        return '<Undefined>'
 
 def get_undefined(f, max_offset=None):
     return Undefined()
@@ -210,6 +218,9 @@ class Reference(object):
 
     def __init__(self, ref):
         self.ref = ref
+
+    def __eq__(self, other):
+        return isinstance(other, Reference) and self.ref == other.ref
 
     def __repr__(self):
         return "<Reference to %d>" % self.ref
