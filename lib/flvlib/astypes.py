@@ -286,10 +286,9 @@ def get_script_data_value(f, max_offset=None):
 def make_script_data_value(value):
     value_type = type_to_as_type.get(value.__class__, VALUE_TYPE_OBJECT)
     log.debug("The value type is %r", value_type)
-    try:
-        make_value = as_type_to_getter_and_maker[value_type][1]
-    except KeyError:
-        raise MalformedFLV("Invalid script data value type: %d", value_type)
+    #  KeyError can't happen here, because we always fall back on
+    #  VALUE_TYPE_OBJECT when determining value_type
+    make_value = as_type_to_getter_and_maker[value_type][1]
     log.debug("The maker function is %r", make_value)
     type_tag = make_ui8(value_type)
     ret = make_value(value)
