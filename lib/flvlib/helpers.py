@@ -53,6 +53,12 @@ class FixedOffset(datetime.tzinfo):
     def dst(self, dt):
         return datetime.timedelta(0)
 
+    def __eq__(self, other):
+        try:
+            return self.__offset == other.__offset and self.__name == other.__name
+        except AttributeError:
+            return False
+
     def __repr__(self):
         return '<FixedOffset %s>' % self.__offset
 
@@ -106,13 +112,39 @@ class OrderedAttrDict(DictMixin):
         except KeyError:
             raise AttributeError(name)
 
+    # Equality
+    def __eq__(self, other):
+        try:
+            my_iter = self.iteritems()
+            his_iter = other.iteritems()
+        except AttributeError:
+            return False
+        my_empty = False
+        his_empty = False
+        while True:
+            try:
+                my_key, my_val = my_iter.next()
+            except StopIteration:
+                my_empty = True
+            try:
+                his_key, his_val = his_iter.next()
+            except StopIteration:
+                his_empty = True
+            if my_empty and his_empty:
+                return True
+            if my_empty or his_empty:
+                return False
+            if (my_key, my_val) != (his_key, his_val):
+                return False
+        #return self._data_priv_ == other and (not isinstance(other, OrderedAttrDict) or self._order_priv_ == other._order_priv_)
+
     # String representation
 
     def __repr__(self):
-        return '<%s %r>' % (self.__class__.__name__, self._data_priv_)
+        return '<%s %s>' % (self.__class__.__name__, self)
 
     def __str__(self):
-        return '%s' % self._data_priv_
+        return '{' + ', '.join([('%r: %r' % item) for item in self._data_priv_.items()]) + '}'
 
 
 class ASPrettyPrinter(object):
