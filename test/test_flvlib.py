@@ -1,9 +1,13 @@
 import unittest
 import test_primitives, test_astypes
 
-if __name__ == "__main__":
+def get_suite():
     primitives = unittest.TestLoader().loadTestsFromModule(test_primitives)
     astypes = unittest.TestLoader().loadTestsFromModule(test_astypes)
-    suite = unittest.TestSuite([primitives, astypes])
-    runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(suite)
+    return unittest.TestSuite([primitives, astypes])
+
+def main():
+    unittest.TextTestRunner(verbosity=2).run(get_suite())
+
+if __name__ == "__main__":
+    main()
