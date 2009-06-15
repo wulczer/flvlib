@@ -2,9 +2,11 @@ This is flvlib, a library for manipulating, parsing and verifying FLV
 files.  It also includes two example scripts, debug-flv and index-flv,
 which demonstrate the possible applications of the library.
 
-If you got the source tarball, you can install it with:
+If you got the source tarball, you can run the automated test suite
+and install the library with:
 $ tar xjf flvlib-x.x.x.tar.bz2
 $ cd flvlib-x.x.x
+$ python setup.py test
 $ sudo python setup.py install
 
 After that you can debug FLV files with:
