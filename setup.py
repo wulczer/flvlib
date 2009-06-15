@@ -47,10 +47,11 @@ Example usage
 import os
 import sys
 
-from distutils.core import setup
+from distutils.core import setup, Command
 
-# Make sure we import flvlib from the current build directory
-curdir = os.path.abspath(os.path.dirname(sys.argv[0]))
+# Make sure we import flvlib from the current directory, not some
+# version that could have been installed earlier on the system
+curdir = sys.path[0]
 sys.path.insert(0, os.path.join(curdir, 'lib'))
 
 from flvlib import __versionstr__
@@ -63,6 +64,19 @@ if sys.platform == 'linux2':
     data_files = [('share/man/man1', ['man/debug-flv.1', 'man/index-flv.1'])]
 else:
     data_files = []
+
+# Define a `test' command to automatically run tests
+class test(Command):
+    description = "run the automated test suite"
+    user_options = []
+
+    def initialize_options(self): pass
+
+    def finalize_options(self): pass
+
+    def run(self):
+        from test.test_flvlib import main
+        main()
 
 setup(name="flvlib",
       version=__versionstr__,
@@ -90,4 +104,5 @@ setup(name="flvlib",
       package_dir={'': 'lib'},
       packages=["flvlib", "flvlib.scripts"],
       scripts=["scripts/debug-flv", "scripts/index-flv"],
-      data_files=data_files)
+      data_files=data_files,
+      cmdclass={'test': test})
