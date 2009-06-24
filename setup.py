@@ -13,7 +13,7 @@ and transforming FLV files. Checks file correctness based on the
 official specification released by Adobe.
 
 Can be used as a drop-in replacement for FLVTool2, from which it is
-typically much faster. Unlike FLVTool2 it works on audio-only file and
+typically much faster. Unlike FLVTool2 it works on audio-only files and
 does not overwrite any previous metadata the file might have.
 
 Example usage
