@@ -151,7 +151,7 @@ class AudioTag(Tag):
         elif self.aac_packet_type is None:
             return ("<AudioTag at offset 0x%08X, time %d, size %d, %s>" %
                     (self.offset, self.timestamp, self.size,
-                     sound_format_to_string.get(self.sound_format, '?'))
+                     sound_format_to_string.get(self.sound_format, '?')))
         else:
             return ("<AudioTag at offset 0x%08X, time %d, size %d, %s, %s>" %
                     (self.offset, self.timestamp, self.size,
