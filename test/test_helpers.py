@@ -8,26 +8,26 @@ from flvlib import helpers
 
 class TestFixedOffsetTimezone(unittest.TestCase):
 
+    def setUp(self):
+        self.now = datetime.datetime.now()
+
     def test_utcoffset(self):
         fo = helpers.FixedOffset(30, "Fixed")
-        self.assertEquals(fo.utcoffset(True), datetime.timedelta(minutes=30))
-        self.assertEquals(fo.utcoffset(False), datetime.timedelta(minutes=30))
+        self.assertEquals(fo.utcoffset(self.now), datetime.timedelta(minutes=30))
 
         fo = helpers.FixedOffset(-15, "Fixed")
-        self.assertEquals(fo.utcoffset(True), datetime.timedelta(minutes=-15))
+        self.assertEquals(fo.utcoffset(self.now), datetime.timedelta(minutes=-15))
 
         fo = helpers.FixedOffset(0, "Fixed")
-        self.assertEquals(fo.utcoffset(True), datetime.timedelta(minutes=0))
+        self.assertEquals(fo.utcoffset(self.now), datetime.timedelta(minutes=0))
 
     def test_tzname(self):
         fo = helpers.FixedOffset(15, "Fixed")
-        self.assertEquals(fo.tzname(True), "Fixed")
-        self.assertEquals(fo.tzname(False), "Fixed")
+        self.assertEquals(fo.tzname(self.now), "Fixed")
 
     def test_dst(self):
         fo = helpers.FixedOffset(15, "Fixed")
-        self.assertEquals(fo.dst(False), datetime.timedelta(0))
-        self.assertEquals(fo.dst(True), datetime.timedelta(0))
+        self.assertEquals(fo.dst(self.now), datetime.timedelta(0))
 
     def test_equality(self):
         fo1 = helpers.FixedOffset(15, "Fixed")
