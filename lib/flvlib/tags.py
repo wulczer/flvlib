@@ -212,11 +212,13 @@ class VideoTag(Tag):
                      codec_id_to_string.get(self.codec_id, '?'),
                      frame_type_to_string.get(self.frame_type, '?')))
         else:
-            return ("<VideoTag at offset 0x%08X, time %d, size %d, %s (%s), %s>" %
+            return ("<VideoTag at offset 0x%08X, "
+                    "time %d, size %d, %s (%s), %s>" %
                     (self.offset, self.timestamp, self.size,
                      codec_id_to_string.get(self.codec_id, '?'),
                      frame_type_to_string.get(self.frame_type, '?'),
-                     h264_packet_type_to_string.get(self.h264_packet_type, '?')))
+                     h264_packet_type_to_string.get(
+                        self.h264_packet_type, '?')))
 
 
 class ScriptTag(Tag):
