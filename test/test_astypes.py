@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import unittest
 from StringIO import StringIO
 from datetime import datetime, timedelta, tzinfo
 from test_common import SerializerTester
