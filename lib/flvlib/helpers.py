@@ -172,7 +172,7 @@ class ASPrettyPrinter(object):
             # list interface
             return cls.pprint_list(val, ident)
         # Unknown type ?
-        cls.io.write("%r" % val)
+        cls.io.write("%r" % (val, ))
         return False
     pprint_lookup = classmethod(pprint_lookup)
 
