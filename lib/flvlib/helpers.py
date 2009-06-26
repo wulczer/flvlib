@@ -41,7 +41,7 @@ class FixedOffset(datetime.tzinfo):
     """Fixed offset in minutes east from UTC."""
 
     def __init__(self, offset, name):
-        self.__offset = datetime.timedelta(minutes = offset)
+        self.__offset = datetime.timedelta(minutes=offset)
         self.__name = name
 
     def utcoffset(self, dt):
@@ -55,7 +55,8 @@ class FixedOffset(datetime.tzinfo):
 
     def __eq__(self, other):
         try:
-            return self.__offset == other.__offset and self.__name == other.__name
+            return (self.__offset == other.__offset and
+                    self.__name == other.__name)
         except AttributeError:
             return False
 
@@ -136,10 +137,8 @@ class OrderedAttrDict(DictMixin):
                 return False
             if (my_key, my_val) != (his_key, his_val):
                 return False
-        #return self._data_priv_ == other and (not isinstance(other, OrderedAttrDict) or self._order_priv_ == other._order_priv_)
 
     # String representation
-
     def __repr__(self):
         return '<%s %s>' % (self.__class__.__name__, self)
 
