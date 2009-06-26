@@ -143,7 +143,8 @@ class OrderedAttrDict(DictMixin):
         return '<%s %s>' % (self.__class__.__name__, self)
 
     def __str__(self):
-        return '{' + ', '.join([('%r: %r' % item) for item in self._data_priv_.items()]) + '}'
+        return '{' + ', '.join([('%r: %r' % (key, self[key]))
+                                for key in self._order_priv_]) + '}'
 
 
 class ASPrettyPrinter(object):
