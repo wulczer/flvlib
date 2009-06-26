@@ -36,7 +36,6 @@ class Tag(object):
         self.offset = None
         self.size = None
         self.timestamp = None
-        self.data_start = None
 
     def parse(self):
         f = self.f
