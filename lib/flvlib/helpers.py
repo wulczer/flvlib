@@ -165,10 +165,10 @@ class ASPrettyPrinter(object):
             return cls.pprint_string(val)
         if isinstance(val, (int, long, float)):
             return cls.pprint_number(val)
-        if getattr(val, 'iterkeys', None):
+        if hasattr(val, 'iterkeys'):
             # dict interface
             return cls.pprint_dict(val, ident)
-        if getattr(val, 'append', None):
+        if hasattr(val, 'append'):
             # list interface
             return cls.pprint_list(val, ident)
         # Unknown type ?
