@@ -1,3 +1,4 @@
+import logging
 import unittest
 from StringIO import StringIO
 
@@ -42,3 +43,14 @@ class SerializerTester(unittest.TestCase):
         s = StringIO(maker(val))
         self.assertEquals(val, getter(s))
         self.assertEquals(s.read(), '')
+
+
+class WarningCounterFilter(object):
+
+    warnings = 0
+
+    def filter(self, record):
+        if record.levelno == logging.WARNING:
+            self.warnings += 1
+            return 0
+        return 1
