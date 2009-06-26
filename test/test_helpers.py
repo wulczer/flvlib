@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+
+import sys
 import datetime
+from StringIO import StringIO
 
 from flvlib import helpers
 
@@ -288,6 +291,14 @@ class TestASPrettyPrinter(unittest.TestCase):
                 return "<Test>"
         t = Test()
         self.assertEquals(self.pp.pformat(t), "<Test>")
+
+    def test_printing(self):
+        s = StringIO()
+        old_stdout, sys.stdout = sys.stdout, s
+        self.pp.pprint([1, 2, 3])
+        # the trailing newline here comes from using Python's print
+        self.assertEquals(s.getvalue(), "[1,\n 2,\n 3]\n")
+        sys.stdout = old_stdout
 
     def test_complex(self):
         o1, o2 = helpers.OrderedAttrDict(), helpers.OrderedAttrDict()
