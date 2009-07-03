@@ -118,21 +118,6 @@ class AudioTag(Tag):
                 raise MalformedFLV("Invalid sound format: %d",
                                    self.sound_format)
             try:
-                sound_rate_to_string[self.sound_rate]
-            except KeyError:
-                raise MalformedFLV("Invalid sound rate: %d",
-                                   self.sound_rate)
-            try:
-                sound_size_to_string[self.sound_size]
-            except KeyError:
-                raise MalformedFLV("Invalid sound size type: %d",
-                                   self.sound_size)
-            try:
-                sound_type_to_string[self.sound_type]
-            except KeyError:
-                raise MalformedFLV("Invalid sound type: %d",
-                                   self.sound_type)
-            try:
                 (self.aac_packet_type and
                  aac_packet_type_to_string[self.aac_packet_type])
             except KeyError:
