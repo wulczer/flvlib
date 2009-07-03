@@ -129,9 +129,6 @@ class AudioTag(Tag):
     def __repr__(self):
         if self.offset is None:
             return "<AudioTag unparsed>"
-        elif self.sound_format is None:
-            return ("<AudioTag at offset 0x%08X, time %d, size %d>" %
-                    (self.offset, self.timestamp, self.size))
         elif self.aac_packet_type is None:
             return ("<AudioTag at offset 0x%08X, time %d, size %d, %s>" %
                     (self.offset, self.timestamp, self.size,
@@ -187,9 +184,6 @@ class VideoTag(Tag):
     def __repr__(self):
         if self.offset is None:
             return "<VideoTag unparsed>"
-        elif self.frame_type is None:
-            return ("<VideoTag at offset 0x%08X, time %d, size %d>" %
-                    (self.offset, self.timestamp, self.size))
         elif self.h264_packet_type is None:
             return ("<VideoTag at offset 0x%08X, time %d, size %d, %s (%s)>" %
                     (self.offset, self.timestamp, self.size,
@@ -243,9 +237,6 @@ class ScriptTag(Tag):
     def __repr__(self):
         if self.offset is None:
             return "<ScriptTag unparsed>"
-        elif not self.name:
-            return ("<ScriptTag at offset 0x%08X, time %d, size %d>" %
-                    (self.offset, self.timestamp, self.size))
         else:
             return ("<ScriptTag %s at offset 0x%08X, time %d, size %d>" %
                     (self.name, self.offset, self.timestamp, self.size))
