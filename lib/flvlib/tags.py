@@ -226,8 +226,7 @@ class ScriptTag(Tag):
         else:
             # 11 = tag type (1) + data size (3) + timestamp (4) + stream id (3)
             tag_end = self.offset + 11 + self.size
-
-        log.debug("max offset is 0x%08X", tag_end)
+            log.debug("max offset is 0x%08X", tag_end)
 
         self.name, self.variable = \
                    get_script_data_variable(f, max_offset=tag_end)
