@@ -1,8 +1,8 @@
 import unittest
-import test_primitives, test_astypes, test_helpers
+import test_primitives, test_astypes, test_helpers, test_tags
 
 def get_suite():
-    modules = (test_primitives, test_astypes, test_helpers)
+    modules = (test_primitives, test_astypes, test_helpers, test_tags)
     suites = [unittest.TestLoader().loadTestsFromModule(module) for
               module in modules]
     return unittest.TestSuite(suites)
