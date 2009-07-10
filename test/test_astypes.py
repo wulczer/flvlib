@@ -258,5 +258,7 @@ class TestScriptSerialization(SerializerTester):
     def test_script_data_variable(self):
         self.set_name('script_data_variable')
         self.add_get_test('\x00\x03\x66\x6f\x6f\x05', ('foo', None))
+        self.run_tests()
+
         # can't just add a maker test, because it expects the maker to accept only one argument
         self.assertEquals(astypes.make_script_data_variable('variable name', [1, 2, '3']), '\x00\x0d\x76\x61\x72\x69\x61\x62\x6c\x65\x20\x6e\x61\x6d\x65\x0a\x00\x00\x00\x03\x00\x3f\xf0\x00\x00\x00\x00\x00\x00\x00\x40\x00\x00\x00\x00\x00\x00\x00\x02\x00\x01\x33')
