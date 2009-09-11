@@ -44,11 +44,9 @@ class Tag(object):
 
         # DataSize
         self.size = get_ui24(f)
-        log.debug("Data size is %d", self.size)
 
         # Timestamp + TimestampExtended
         self.timestamp = get_si32_extended(f)
-        log.debug("Tag timestamp is %d", self.timestamp)
 
         if self.timestamp < 0:
             log.warning("The tag at offset 0x%08X has negative timestamp: %d",
@@ -68,7 +66,6 @@ class Tag(object):
                "not equal to actual tag size of %d (0x%08X)" %
                (previous_tag_size, previous_tag_size,
                 self.size + 11, self.size + 11))
-        log.debug("Ready to read another tag")
 
     def parse_tag_content(self):
         # By default just seek past the tag content
@@ -324,7 +321,6 @@ class FLV(object):
 
         tag_klass = self.tag_type_to_class(tag_type)
         tag = tag_klass(self, f)
-        log.debug("Found a tag: %s", tag)
 
         tag.parse()
 
