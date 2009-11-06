@@ -20,5 +20,5 @@ handler.setFormatter(formatter)
 
 log.addHandler(handler)
 
-__version__ = (0, 1, 7)
+__version__ = (0, 1, 7, 1)
 __versionstr__ = '.'.join([str(n) for n in __version__])
