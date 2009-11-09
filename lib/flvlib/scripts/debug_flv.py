@@ -49,6 +49,8 @@ def debug_file(filename, quiet=False, metadata=False):
 
     f.close()
 
+    return True
+
 
 def process_options():
     usage = "%prog [options] files ..."
