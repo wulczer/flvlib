@@ -121,7 +121,7 @@ def filepositions_difference(metadata, original_metadata_size):
 
 
 def index_file(inpath, outpath=None):
-    out_text = (outpath and ("into file `%s'" % outpath)) or "in place"
+    out_text = (outpath and ("into file `%s'" % outpath)) or "and overwriting"
     log.debug("Indexing file `%s' %s", inpath, out_text)
 
     try:
@@ -135,7 +135,13 @@ def index_file(inpath, outpath=None):
     last_tag = None
 
     try:
-        while True: last_tag = tag_iterator.next()
+        while True:
+            tag = tag_iterator.next()
+            # some buggy software, like gstreamer's flvmux, puts a metadata tag
+            # at the end of the file with timestamp 0, and we don't want to
+            # base our duration computation on that
+            if tag.timestamp != 0:
+                last_tag = tag
     except MalformedFLV, e:
         message = e[0] % e[1:]
         log.error("The file `%s' is not a valid FLV file: %s", inpath, message)
@@ -148,6 +154,11 @@ def index_file(inpath, outpath=None):
 
     if not flv.first_media_tag_offset:
         log.error("The file `%s' does not have any media content", inpath)
+        return False
+
+    if not last_tag:
+        log.error("The file `%s' does not have any content with a "
+                  "non-zero timestamp", inpath)
         return False
 
     metadata = flv.metadata or {}
@@ -165,10 +176,10 @@ def index_file(inpath, outpath=None):
                  inpath)
         keyframes = flv.audio_seekpoints
 
-    duration = metadata.get('duration', None)
+    duration = metadata.get('duration')
     if not duration:
-        # if the file has no tags at all, we would have errored out
-        # eariler, while checking for media content presence
+        # A duration of 0 is nonsensical, yet some tools put it like that. In
+        # that case (or when there is no such field) update the duration value.
         duration = last_tag.timestamp / 1000.0
 
     metadata['duration'] = duration
@@ -240,8 +251,8 @@ def process_options():
                    "in FLV files and updates the onMetaData "
                    "script tag with that information. "
                    "With the -U (update) option operates on all parameters, "
-                   "updating the files in place. Without the -U option "
-                   "accepts one input and one output file path.")
+                   "overwriting the original file. Without the -U "
+                   "option accepts one input and one output file path.")
     version = "%%prog flvlib %s" % __versionstr__
     parser = OptionParser(usage=usage, description=description,
                           version=version)
