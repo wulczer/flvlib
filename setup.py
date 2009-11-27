@@ -5,7 +5,7 @@
 
 A library for manipulating, parsing and verifying FLV files.
 
-It includes two example scripts, debug-flv and index-flv,
+It includes three example scripts, debug-flv, index-flv and retimestamp-flv
 which demonstrate the possible applications of the library.
 
 Provides an easy and extensible way of writing applications that parse
@@ -42,6 +42,25 @@ Example usage
     {'duration': 9.979000000000001,
      'keyframes': {'filepositions': [407.0], 'times': [0.0]},
      'metadatacreator': 'flvlib 0.x.x'}
+
+**Retimestamping an FLV file**
+
+::
+
+    $ debug-flv file.flv | head -5
+    === `file.flv' ===
+    #00001 <AudioTag at offset 0x0000000D, time 100, size 162, MP3>
+    #00002 <AudioTag at offset 0x000000BE, time 100, size 105, MP3>
+    #00003 <VideoTag at offset 0x00000136, time 100, size 33903, VP6 (keyframe)>
+    #00004 <AudioTag at offset 0x000085B4, time 126, size 105, MP3>
+
+    $ retimestamp-flv -U file.flv
+    $ debug-flv file.flv | head -5
+    === `file.flv' ===
+    #00001 <AudioTag at offset 0x0000000D, time 0, size 162, MP3>
+    #00002 <AudioTag at offset 0x000000BE, time 0, size 105, MP3>
+    #00003 <VideoTag at offset 0x00000136, time 0, size 33903, VP6 (keyframe)>
+    #00004 <AudioTag at offset 0x000085B4, time 26, size 105, MP3>
 """
 
 import os
@@ -61,7 +80,8 @@ sys.path = sys.path[1:]
 
 # Don't install man pages and the README on a non-Linux system
 if sys.platform == 'linux2':
-    data_files = [('share/man/man1', ['man/debug-flv.1', 'man/index-flv.1'])]
+    data_files = [('share/man/man1', ['man/debug-flv.1', 'man/index-flv.1',
+                                      'man/retimestamp-flv.1'])]
 else:
     data_files = []
 
@@ -103,6 +123,7 @@ setup(name="flvlib",
       download_url="http://wulczer.org/flvlib/flvlib-latest.tar.bz2",
       package_dir={'': 'lib'},
       packages=["flvlib", "flvlib.scripts"],
-      scripts=["scripts/debug-flv", "scripts/index-flv"],
+      scripts=["scripts/debug-flv", "scripts/index-flv",
+               "scripts/retimestamp-flv"],
       data_files=data_files,
       cmdclass={'test': test})
