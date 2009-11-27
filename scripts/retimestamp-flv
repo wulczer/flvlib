@@ -1,0 +1,4 @@
+#!/usr/bin/python
+
+from flvlib.scripts import retimestamp_flv
+retimestamp_flv.main()
