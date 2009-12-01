@@ -6,9 +6,9 @@ retimestamp-flv \- change timestamps in an FLV file
 [\fIoptions\fR] \fIfiles \fR...
 .SH DESCRIPTION
 Rewrites timestamps in FLV files making by the first media tag timestamped with
-0. The rest of the tags is retimestamped relatively. If the file has a
-onMetaData script tag with an index, it will get updated accordingly as
-well.
+0. The rest of the tags is retimestamped relatively. If the file contained an
+index in the onMetaData script tag, the retimestamping will probably make it
+invalid. Be sure to reindex your files after retimestamping them.
 .SH OPTIONS
 .TP
 \fB\-\-version\fR
