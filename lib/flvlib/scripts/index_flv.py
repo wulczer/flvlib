@@ -12,6 +12,7 @@ from flvlib.constants import FRAME_TYPE_KEYFRAME
 from flvlib.astypes import MalformedFLV, FLVObject
 from flvlib.tags import FLV, EndOfFile, AudioTag, VideoTag, ScriptTag
 from flvlib.tags import create_script_tag, create_flv_header
+from flvlib.helpers import force_remove
 
 log = logging.getLogger('flvlib.index-flv')
 
@@ -227,6 +228,9 @@ def index_file(inpath, outpath=None):
         shutil.copyfileobj(f, fo)
     except IOError, (errno, strerror):
         log.error("Failed to create the indexed file: %s", strerror)
+        if not outpath:
+            # remove the temporary file
+            force_remove(temppath)
         return False
 
     f.close()

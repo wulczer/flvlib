@@ -1,3 +1,4 @@
+import os
 import time
 import datetime
 
@@ -227,3 +228,10 @@ class ASPrettyPrinter(object):
 
 pformat = ASPrettyPrinter.pformat
 pprint = ASPrettyPrinter.pprint
+
+
+def force_remove(path):
+    try:
+        os.remove(path)
+    except OSError:
+        pass
