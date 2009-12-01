@@ -121,6 +121,69 @@ def filepositions_difference(metadata, original_metadata_size):
     return test_payload, difference
 
 
+def retimestamp_and_index_file(inpath, outpath=None, retimestamp=None):
+
+    # no retimestamping needed
+    if retimestamp is None:
+
+        return index_file(inpath, outpath)
+
+    # retimestamp the input in place and index
+    elif retimestamp == 'inplace':
+        from flvlib.scripts.retimestamp_flv import retimestamp_file_inplace
+
+        log.debug("Retimestamping file `%s' in place", inpath)
+
+        # retimestamp the file inplace
+        if not retimestamp_file_inplace(inpath):
+            log.error("Failed to retimestamp `%s' in place", inpath)
+            return False
+
+        return index_file(inpath, outpath)
+
+    # retimestamp the input into a temporary file
+    elif retimestamp == 'atomic':
+        from flvlib.scripts.retimestamp_flv import retimestamp_file_atomically
+
+        log.debug("Retimestamping file `%s' atomically", inpath)
+
+        try:
+            fd, temppath = tempfile.mkstemp()
+            os.close(fd)
+            # preserve the permission bits
+            shutil.copymode(inpath, temppath)
+        except EnvironmentError, (errno, strerror):
+            log.error("Failed to create temporary file: %s", strerror)
+            return False
+
+        if not retimestamp_file_atomically(inpath, temppath):
+            log.error("Failed to retimestamp `%s' atomically", inpath)
+            # remove the temporary files
+            force_remove(temppath)
+            return False
+
+        # index the temporary file
+        if not index_file(temppath, outpath):
+            force_remove(temppath)
+            return False
+
+        if not outpath:
+            # If we were not writing directly to the output file
+            # we need to overwrite the original
+            try:
+                shutil.move(temppath, inpath)
+            except EnvironmentError, (errno, strerror):
+                log.error("Failed to overwrite the original file with the "
+                          "retimestamped and indexed version: %s", strerror)
+                return False
+        else:
+            # if we were writing directly to the output file we need to remove
+            # the retimestamped temporary file
+            force_remove(temppath)
+
+        return True
+
+
 def index_file(inpath, outpath=None):
     out_text = (outpath and ("into file `%s'" % outpath)) or "and overwriting"
     log.debug("Indexing file `%s' %s", inpath, out_text)
@@ -263,6 +326,13 @@ def process_options():
     parser.add_option("-U", "--update", action="store_true",
                       help=("update mode, overwrites the given files "
                             "instead of writing to outfile"))
+    parser.add_option("-r", "--retimestamp", action="store_true",
+                      help=("rewrite timestamps in the files before indexing, "
+                            "identical to running retimestamp-flv first"))
+    parser.add_option("-R", "--retimestamp-inplace", action="store_true",
+                      help=("same as -r but avoid creating temporary files at "
+                            "the risk of corrupting the input files in case "
+                            "of errors"))
     parser.add_option("-v", "--verbose", action="count",
                       default=0, dest="verbosity",
                       help="be more verbose, each -v increases verbosity")
@@ -274,6 +344,9 @@ def process_options():
     if not options.update and len(args) != 3:
         parser.error("You need to provide one infile and one outfile "
                      "when not using the update mode")
+
+    if options.retimestamp and options.retimestamp_inplace:
+        parser.error("You cannot provide both -r and -R")
 
     if options.verbosity > 3:
         options.verbosity = 3
@@ -289,11 +362,19 @@ def index_files():
 
     clean_run = True
 
+    retimestamp_mode = None
+    if options.retimestamp:
+        retimestamp_mode = 'atomic'
+    elif options.retimestamp_inplace:
+        retimestamp_mode = 'inplace'
+
     if not options.update:
-        clean_run = index_file(args[1], args[2])
+        clean_run = retimestamp_and_index_file(args[1], args[2],
+                                               retimestamp=retimestamp_mode)
     else:
         for filename in args[1:]:
-            if not index_file(filename):
+            if not retimestamp_and_index_file(filename,
+                                              retimestamp=retimestamp_mode):
                 clean_run = False
 
     return clean_run
