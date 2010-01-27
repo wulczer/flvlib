@@ -2,13 +2,14 @@ Source: flvlib
 Section: python
 Priority: optional
 Maintainer: Jan Urbanski <wulczer@wulczer.org>
-Build-Depends: debhelper (>= 5.0.38), python-all-dev (>= 2.3.5-11), python-central (>= 0.5.6)
+Build-Depends: debhelper (>= 5.0.38), python-all (>= 2.3.5-11), python-central (>= 0.5.6)
 XS-Python-Version: >=2.4
 Standards-Version: 3.8.0
 
 Package: python-flvlib
 Architecture: all
-Depends: ${python:Depends}
+Depends: ${python:Depends},
+         ${misc:Depends}
 Homepage: http://wulczer.org/
 XB-Python-Version: >= 2.4
 Description: Parsing and manipulating FLV files
