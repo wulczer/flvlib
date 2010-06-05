@@ -1,4 +1,3 @@
-import unittest
 from StringIO import StringIO
 from test_common import SerializerTester
 

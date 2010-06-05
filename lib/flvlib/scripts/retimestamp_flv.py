@@ -13,7 +13,6 @@ from flvlib.constants import H264_PACKET_TYPE_SEQUENCE_HEADER
 from flvlib.primitives import make_ui8, make_ui24, make_si32_extended
 from flvlib.astypes import MalformedFLV
 from flvlib.tags import FLV, EndOfFile, AudioTag, VideoTag, ScriptTag
-from flvlib.tags import create_script_tag, create_flv_header
 from flvlib.helpers import force_remove
 
 log = logging.getLogger('flvlib.retimestamp-flv')
