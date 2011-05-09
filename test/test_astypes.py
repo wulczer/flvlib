@@ -142,13 +142,19 @@ class TestASTypes(ScriptDataValueSerializerTester):
 
     def test_date(self):
         self.set_name('date')
-        self.add_get_test('\x42\x5d\x2b\x75\x29\xaa\x00\x00\x00\x1e',
-                          datetime(1985, 11, 18, 4, 0, 1, tzinfo=FakeTZInfo(30)))
+        date = '\x42\x5d\x2b\x75\x29\xaa\x00\x00'
+        expected = datetime(1985, 11, 18, 3, 30, 1, tzinfo=FakeTZInfo(0))
+        self.add_get_test(date + '\x00\x00', expected)
+        # the time offset gets ignored
+        self.add_get_test(date + '\x00\x1e', expected)
         self.add_get_test('\x42\x5d\x2b\x7c\x07\x7a\x00\x00\x00\x00',
                           datetime(1985, 11, 18, 4, 0, 1, tzinfo=FakeTZInfo(0)))
+        # timezone-aware datetimes are converted to UTC and no time offset is stored
         self.add_make_test(datetime(2009, 01, 01, 20, 0, 0, tzinfo=FakeTZInfo(10)),
-                           '\x42\x71\xe9\x3b\xec\x64\x00\x00\x00\x0a')
-        # FIXME add tests for serializing naive datetimes
+                           '\x42\x71\xe9\x3b\xec\x64\x00\x00\x00\x00')
+        # naive datetimes are assumed to be in UTC
+        self.add_make_test(datetime(2009, 01, 01, 19, 50, 0,),
+                           '\x42\x71\xe9\x3b\xec\x64\x00\x00\x00\x00')
         self.add_equivalence_test(datetime.now(FakeTZInfo(0)).replace(microsecond=0))
         self.add_equivalence_test(datetime.now(FakeTZInfo(-10)).replace(microsecond=0))
         self.run_tests()

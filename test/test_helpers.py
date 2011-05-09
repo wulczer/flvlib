@@ -9,46 +9,20 @@ from StringIO import StringIO
 from flvlib import helpers
 
 
-class TestFixedOffsetTimezone(unittest.TestCase):
+class TestUTCTimezone(unittest.TestCase):
 
     def setUp(self):
         self.now = datetime.datetime.now()
+        self.utc = helpers.UTC()
 
     def test_utcoffset(self):
-        fo = helpers.FixedOffset(30, "Fixed")
-        self.assertEquals(fo.utcoffset(self.now), datetime.timedelta(minutes=30))
-
-        fo = helpers.FixedOffset(-15, "Fixed")
-        self.assertEquals(fo.utcoffset(self.now), datetime.timedelta(minutes=-15))
-
-        fo = helpers.FixedOffset(0, "Fixed")
-        self.assertEquals(fo.utcoffset(self.now), datetime.timedelta(minutes=0))
+        self.assertEquals(self.utc.utcoffset(self.now), datetime.timedelta(0))
 
     def test_tzname(self):
-        fo = helpers.FixedOffset(15, "Fixed")
-        self.assertEquals(fo.tzname(self.now), "Fixed")
+        self.assertEquals(self.utc.tzname(self.now), "UTC")
 
     def test_dst(self):
-        fo = helpers.FixedOffset(15, "Fixed")
-        self.assertEquals(fo.dst(self.now), datetime.timedelta(0))
-
-    def test_equality(self):
-        fo1 = helpers.FixedOffset(15, "Fixed")
-        fo2 = helpers.FixedOffset(15, "Fixed")
-        self.assertEquals(fo1, fo2)
-
-        fo2 = helpers.FixedOffset(16, "Fixed")
-        self.assertNotEquals(fo1, fo2)
-
-        fo2 = helpers.FixedOffset(15, "Fixed2")
-        self.assertNotEquals(fo1, fo2)
-
-        self.assertNotEquals(fo1, None)
-
-    def test_repr(self):
-        fo = helpers.FixedOffset(15, "Fixed")
-        self.assertEquals(repr(fo),
-                          "<FixedOffset %s>" % datetime.timedelta(minutes=15))
+        self.assertEquals(self.utc.dst(self.now), datetime.timedelta(0))
 
 
 class TestOrderedAttrDict(unittest.TestCase):

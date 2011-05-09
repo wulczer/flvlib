@@ -1,11 +1,11 @@
 import os
-import time
+import calendar
 import datetime
 import logging
 
 from primitives import *
 from constants import *
-from helpers import FixedOffset, Local, OrderedAttrDict
+from helpers import OrderedAttrDict, utc
 
 
 """
@@ -116,21 +116,25 @@ def make_strict_array(l):
 # Date
 def get_date(f, max_offset=None):
     timestamp = get_number(f) / 1000.0
-    time_offset = get_si16(f)
-    tz = FixedOffset(time_offset, "FLV Fixed Offset")
-    return datetime.datetime.fromtimestamp(timestamp, tz)
+    # From the following document:
+    #   http://opensource.adobe.com/wiki/download/
+    #   attachments/1114283/amf0_spec_121207.pdf
+    #
+    # Section 2.13 Date Type
+    #
+    # (...) While the design of this type reserves room for time zone offset
+    # information, it should not be filled in, nor used (...)
+    _ignored = get_si16(f)
+    return datetime.datetime.fromtimestamp(timestamp, utc)
 
 def make_date(date):
     if date.tzinfo:
-        local_date = date.astimezone(Local)
+        utc_date = date.astimezone(utc)
     else:
-        local_date = date
-    ret = make_number(time.mktime(local_date.timetuple()) * 1000)
-    time_offset = date.utcoffset()
-    if time_offset is not None:
-        offset = time_offset.days * 24 * 26 + time_offset.seconds / 60
-    else:
-        offset = 0
+        # assume it's UTC
+        utc_date = date.replace(tzinfo=utc)
+    ret = make_number(calendar.timegm(utc_date.timetuple()) * 1000)
+    offset = 0
     return ret + make_si16(offset)
 
 
