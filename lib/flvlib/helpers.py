@@ -127,6 +127,8 @@ class ASPrettyPrinter(object):
             return cls.pprint_string(val)
         if isinstance(val, (int, long, float)):
             return cls.pprint_number(val)
+        if isinstance(val, datetime.datetime):
+            return cls.pprint_datetime(val)
         if hasattr(val, 'iterkeys'):
             # dict interface
             return cls.pprint_dict(val, ident)
@@ -150,6 +152,11 @@ class ASPrettyPrinter(object):
         cls.io.write(str(val))
         return False
     pprint_number = classmethod(pprint_number)
+
+    def pprint_datetime(cls, val):
+        cls.io.write(val.replace(microsecond=0).isoformat(' '))
+        return False
+    pprint_datetime = classmethod(pprint_datetime)
 
     def pprint_dict(cls, val, indent):
 

@@ -238,6 +238,13 @@ class TestASPrettyPrinter(unittest.TestCase):
         self.assertEquals(self.pp.pformat(0.4), "0.4")
         self.assertEquals(self.pp.pformat(10L), "10")
 
+    def test_datetime(self):
+        date = datetime.datetime(1990, 01, 02, 20, 30, 22)
+        self.assertEquals(self.pp.pformat(date), "1990-01-02 20:30:22")
+
+        self.assertEquals(self.pp.pformat(date.replace(tzinfo=helpers.utc)),
+                                          "1990-01-02 20:30:22+00:00")
+
     def test_dict(self):
         self.assertEquals(self.pp.pformat({}), "{}")
         self.assertEquals(self.pp.pformat({'a': 1}), "{'a': 1}")
