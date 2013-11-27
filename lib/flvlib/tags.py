@@ -238,10 +238,24 @@ class ScriptTag(Tag):
                     (self.name, self.offset, self.timestamp, self.size))
 
 
+class ScriptAmf3Tag(Tag):
+
+    def __init__(self, parent_flv, f):
+        Tag.__init__(self, parent_flv, f)
+
+    def __repr__(self):
+        if self.offset is None:
+            return "<ScriptAmf3Tag unparsed>"
+        else:
+            return ("<ScriptAmf3Tag at offset 0x%08X, time %d, size %d>" %
+                    (self.offset, self.timestamp, self.size))
+
+
 tag_to_class = {
     TAG_TYPE_AUDIO: AudioTag,
     TAG_TYPE_VIDEO: VideoTag,
-    TAG_TYPE_SCRIPT: ScriptTag
+    TAG_TYPE_SCRIPT: ScriptTag,
+    TAG_TYPE_SCRIPT_AMF3: ScriptAmf3Tag,
 }
 
 
