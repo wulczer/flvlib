@@ -3,7 +3,10 @@ The constants used in FLV files and their meanings.
 """
 
 # Tag type
-(TAG_TYPE_AUDIO, TAG_TYPE_VIDEO, TAG_TYPE_SCRIPT) = (8, 9, 18)
+(TAG_TYPE_AUDIO,
+ TAG_TYPE_VIDEO,
+ TAG_TYPE_SCRIPT_AMF3,
+ TAG_TYPE_SCRIPT) = (8, 9, 15, 18)
 
 
 # Sound format
