@@ -100,6 +100,9 @@ class OrderedAttrDict(DictMixin):
             if (my_key, my_val) != (his_key, his_val):
                 return False
 
+    def __ne__(self, other):
+        return not self == other
+
     # String representation
     def __repr__(self):
         return '<%s %s>' % (self.__class__.__name__, self)
