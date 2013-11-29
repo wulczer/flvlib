@@ -329,6 +329,34 @@ class TestScriptTag(TestUnderStrictParsing):
                           "time 9823, size 7>")
 
 
+class TestScriptAMF3Tag(TestUnderStrictParsing):
+
+    def test_simple_script_amf3_tag(self):
+        s = StringIO('\x00\x00\x17\x00\x00\x4d\x00\x00\x00\x00' +
+                     '\x00\x02\x00\x0a\x73\x74\x72\x65\x61\x6d' +
+                     '\x50\x69\x6e\x67\x00\x42\x74\x29\xa6\xff' +
+                     '\x4b\x50\x00\x00\x00\x00\x22')
+        t = tags.ScriptAMF3Tag(None, s)
+        t.parse()
+
+        self.assertEquals(t.offset, -1)
+        self.assertEquals(t.size, 23)
+        self.assertEquals(t.timestamp, 77)
+
+    def test_repr(self):
+        s = LStringIO('\x00\x00\x17\x00\x00\x4d\x00\x00\x00\x00' +
+                      '\x00\x02\x00\x0a\x73\x74\x72\x65\x61\x6d' +
+                      '\x50\x69\x6e\x67\x00\x42\x74\x29\xa6\xff' +
+                      '\x4b\x50\x00\x00\x00\x00\x22', 10)
+        t = tags.ScriptAMF3Tag(None, s)
+        self.assertEquals(repr(t), "<ScriptAMF3Tag unparsed>")
+
+        t.parse()
+        self.assertEquals(repr(t),
+                          "<ScriptAMF3Tag at offset 0x00000009, "
+                          "time 77, size 23>")
+
+
 class TestFLV(TestUnderStrictParsing, BodyGeneratorMixin):
 
     def test_simple_parse(self):
@@ -345,6 +373,10 @@ class TestFLV(TestUnderStrictParsing, BodyGeneratorMixin):
                      '\x08' + self.tag_body('\x4b') +
                      '\x08' + self.tag_body('\xbb') +
                      '\x09' + self.tag_body('\x17\x00') +
+                     '\x0f' + ('\x00\x00\x17\x00\x00\x4d\x00\x00\x00\x00' +
+                               '\x00\x02\x00\x0a\x73\x74\x72\x65\x61\x6d' +
+                               '\x50\x69\x6e\x67\x00\x42\x74\x29\xa6\xff' +
+                               '\x4b\x50\x00\x00\x00\x00\x22') +
                      '\x12' + ('\x00\x00\x07\x00\x26\x5f\x00\x00\x00\x00' +
                                '\x02\x00\x03\x66\x6f\x6f\x05\x00\x00\x00\x12'))
         f = tags.FLV(s)
@@ -354,11 +386,12 @@ class TestFLV(TestUnderStrictParsing, BodyGeneratorMixin):
         self.assertEquals(f.has_audio, True)
         self.assertEquals(f.has_video, True)
 
-        self.assertEquals(len(f.tags), 4)
+        self.assertEquals(len(f.tags), 5)
         self.assertTrue(isinstance(f.tags[0], tags.AudioTag))
         self.assertTrue(isinstance(f.tags[1], tags.AudioTag))
         self.assertTrue(isinstance(f.tags[2], tags.VideoTag))
-        self.assertTrue(isinstance(f.tags[3], tags.ScriptTag))
+        self.assertTrue(isinstance(f.tags[3], tags.ScriptAMF3Tag))
+        self.assertTrue(isinstance(f.tags[4], tags.ScriptTag))
 
     def test_errors(self):
         # file shorter than 3 bytes
