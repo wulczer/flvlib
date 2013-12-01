@@ -5,8 +5,8 @@
 
 A library for manipulating, parsing and verifying FLV files.
 
-It includes three example scripts, debug-flv, index-flv and retimestamp-flv
-which demonstrate the possible applications of the library.
+It includes three example scripts, debug-flv, index-flv, retimestamp-flv
+and cut-flv which demonstrate the possible applications of the library.
 
 Provides an easy and extensible way of writing applications that parse
 and transforming FLV files. Checks file correctness based on the
@@ -124,6 +124,6 @@ setup(name="flvlib",
       package_dir={'': 'lib'},
       packages=["flvlib", "flvlib.scripts"],
       scripts=["scripts/debug-flv", "scripts/index-flv",
-               "scripts/retimestamp-flv"],
+               "scripts/retimestamp-flv", "scripts/cut-flv"],
       data_files=data_files,
       cmdclass={'test': test})

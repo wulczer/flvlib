@@ -1,0 +1,4 @@
+#!/usr/bin/python
+
+from flvlib.scripts import cut_flv
+cut_flv.main()
