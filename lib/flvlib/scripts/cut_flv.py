@@ -1,6 +1,4 @@
-import os
 import sys
-import shutil
 import logging
 
 from optparse import OptionParser
@@ -12,18 +10,12 @@ from flvlib.constants import H264_PACKET_TYPE_SEQUENCE_HEADER
 from flvlib.constants import H264_PACKET_TYPE_NALU
 from flvlib.astypes import MalformedFLV, FLVObject
 from flvlib.tags import FLV, EndOfFile, AudioTag, VideoTag, ScriptTag
-from flvlib.tags import create_script_tag, create_flv_header
-from flvlib.helpers import force_remove
+
 
 log = logging.getLogger('flvlib.cut-flv')
 
 
 class CuttingAudioTag(AudioTag):
-
-    SEEKPOINT_DENSITY = 10
-
-    def __init__(self, parent_flv, f):
-        AudioTag.__init__(self, parent_flv, f)
 
     def parse(self):
         parent = self.parent_flv
@@ -31,11 +23,6 @@ class CuttingAudioTag(AudioTag):
 
         if not parent.first_media_tag_offset:
             parent.first_media_tag_offset = self.offset
-
-        # If the FLV has video, we're done. No need to store audio seekpoint
-        # information anymore.
-        if not parent.no_video:
-            return
 
 
 class CuttingVideoTag(VideoTag):
@@ -46,7 +33,8 @@ class CuttingVideoTag(VideoTag):
 
         parent.no_video = False
 
-        if not parent.first_media_tag_offset and self.h264_packet_type != H264_PACKET_TYPE_SEQUENCE_HEADER:
+        if (not parent.first_media_tag_offset and
+                self.h264_packet_type != H264_PACKET_TYPE_SEQUENCE_HEADER):
             parent.first_media_tag_offset = self.offset
 
 
@@ -76,12 +64,8 @@ class CuttingFLV(FLV):
             raise MalformedFLV("Invalid tag type: %d", tag_type)
 
 
-
-
-
 def cut_file(inpath, outpath, start_time, end_time):
-    out_text = (outpath and ("into file `%s'" % outpath)) or "and overwriting"
-    log.debug("Cutting file `%s' %s", inpath, out_text)
+    log.debug("Cutting file `%s' into file `%s'", inpath, outpath)
 
     try:
         f = open(inpath, 'rb')
@@ -103,11 +87,13 @@ def cut_file(inpath, outpath, start_time, end_time):
         end_time = -1
     else:
         end_time = int(end_time)
+
     flv = CuttingFLV(f)
     tag_iterator = flv.iter_tags()
     last_tag = None
     tag_after_last_tag = None
     first_keyframe_after_start = None
+
     try:
         while True:
             tag = tag_iterator.next()
@@ -115,18 +101,17 @@ def cut_file(inpath, outpath, start_time, end_time):
             # at the end of the file with timestamp 0, and we don't want to
             # base our duration computation on that
             if tag.timestamp != 0 and (
-                        tag.timestamp <= end_time or end_time == -1):
+                    tag.timestamp <= end_time or end_time == -1):
                 last_tag = tag
             elif tag_after_last_tag is None and tag.timestamp != 0:
                 tag_after_last_tag = tag
             if not first_keyframe_after_start and tag.timestamp > start_time:
-                if hasattr(tag, "h264_packet_type"):
+                if isinstance(tag, VideoTag):
                     if (tag.frame_type == FRAME_TYPE_KEYFRAME and
                             tag.h264_packet_type == H264_PACKET_TYPE_NALU):
                         first_keyframe_after_start = tag
                 elif flv.no_video:
                     first_keyframe_after_start = tag
-
     except MalformedFLV, e:
         message = e[0] % e[1:]
         log.error("The file `%s' is not a valid FLV file: %s", inpath, message)
@@ -169,8 +154,9 @@ def cut_file(inpath, outpath, start_time, end_time):
     log.debug("end offset %d", end_offset)
     f.seek(first_keyframe_after_start.offset)
 
-    log.debug("copying %d bytes", end_offset - first_keyframe_after_start.offset)
-    fo.write(f.read(end_offset - first_keyframe_after_start.offset))
+    copy_bytes = end_offset - first_keyframe_after_start.offset
+    log.debug("copying %d bytes", copy_bytes)
+    fo.write(f.read(copy_bytes))
     f.close()
     fo.close()
     return True
@@ -178,29 +164,28 @@ def cut_file(inpath, outpath, start_time, end_time):
 
 def process_options():
     usage = "%prog file outfile"
-    description = ("Finds keyframe timestamps and file offsets "
-                   "in FLV files and updates the onMetaData "
-                   "script tag with that information. "
-                   "With the -U (update) option operates on all parameters, "
-                   "overwriting the original file. Without the -U "
-                   "option accepts one input and one output file path.")
+    description = ("Cut out part of a FLV file. Start and end times are "
+                   "timestamps that will be compared to the timestamps "
+                   "of tags from inside the file. Tags from outside of the "
+                   "start/end range will be discarded, taking care to always "
+                   "start the new file with a keyframe. "
+                   "The script accepts one input and one output file path.")
     version = "%%prog flvlib %s" % __versionstr__
     parser = OptionParser(usage=usage, description=description,
                           version=version)
-    parser.add_option("-s", "--start-time", dest="start_time",
-                      help=("start time to cut from"))
-    parser.add_option("-e", "--end-time", dest="end_time",
-                      help=("end time to cut to"))
+    parser.add_option("-s", "--start-time", help="start time to cut from")
+    parser.add_option("-e", "--end-time", help="end time to cut to")
     parser.add_option("-v", "--verbose", action="count",
                       default=0, dest="verbosity",
                       help="be more verbose, each -v increases verbosity")
     options, args = parser.parse_args(sys.argv)
 
     if len(args) < 2:
-        parser.error("You have to provide at least one file path")
+        parser.error("You have to provide an input and output file path")
 
     if not options.start_time and not options.end_time:
-        parser.error("You need to provide either a start time or end time ")
+        parser.error("You need to provide at least "
+                     "one of start time or end time ")
 
     if options.verbosity > 3:
         options.verbosity = 3
@@ -213,8 +198,6 @@ def process_options():
 
 def cut_files():
     options, args = process_options()
-    print(options)
-    print(args)
     return cut_file(args[1], args[2], options.start_time, options.end_time)
 
 
@@ -236,6 +219,7 @@ def main():
         sys.exit(0)
     else:
         sys.exit(1)
+
 
 if __name__ == '__main__':
     main()
